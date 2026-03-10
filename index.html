@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="description" content="Guadua Quest: el juego interactivo sobre la política pública de la guadua en Colombia. Pon a prueba tu conocimiento sobre la Ley 2206, salvoconductos, cadenas productivas y más.">
+<meta name="theme-color" content="#0d1f16">
+<meta property="og:title" content="Guadua Quest — El Juego del Saber Verde">
+<meta property="og:description" content="¿Cuánto sabes sobre la normativa colombiana de la guadua? 30 preguntas, 4 bloques temáticos. ¡Juega gratis!">
+<meta property="og:image" content="Kiosco_SAM_AGB.jpg">
+<meta property="og:type" content="website">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>🎋 Guadua Quest — El Juego del Saber Verde</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Lora:ital,wght@0,400;0,600;1,400&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{--v1:#0d1f16;--v2:#1a3a2a;--v3:#2d6a4f;--v4:#40916c;--v5:#52b788;--v6:#95d5b2;--oro:#d4a847;--dorado:#f0c040;--crema:#fef9ef;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Lora',serif;background:var(--v1);color:var(--crema);min-height:100vh;overflow-x:hidden;}
+#bg{position:fixed;inset:0;z-index:0;overflow:hidden;background:linear-gradient(180deg,#060f09 0%,#0d1f16 45%,#1a3a2a 100%);}
+.cana{position:absolute;bottom:0;border-radius:5px 5px 0 0;transform-origin:bottom center;animation:mec 5s ease-in-out infinite;}
+@keyframes mec{0%,100%{transform:rotate(-1.5deg)}50%{transform:rotate(1.5deg)}}
+.hoja-a{position:absolute;border-radius:50% 0 50% 0;animation:flo 9s ease-in-out infinite;}
+@keyframes flo{0%,100%{transform:translateY(0) rotate(0deg)}50%{transform:translateY(-18px) rotate(4deg)}}
+.burbuja{position:fixed;border-radius:50%;pointer-events:none;animation:sub linear forwards;z-index:1;}
+@keyframes sub{from{transform:translateY(0);opacity:.6}to{transform:translateY(-100vh);opacity:0}}
+.pantalla{position:relative;z-index:10;display:none;min-height:100vh;align-items:center;justify-content:center;flex-direction:column;padding:20px;text-align:center;}
+.pantalla.activa{display:flex;}
+
+/* INICIO */
+.logo-t{font-family:'Playfair Display',serif;font-size:clamp(2.8rem,7.5vw,5.8rem);font-weight:900;line-height:1;color:var(--dorado);text-shadow:0 4px 28px rgba(240,192,64,.4),0 0 70px rgba(82,183,136,.25);animation:ap 1s ease both;}
+.logo-s{font-style:italic;font-size:clamp(.88rem,2.3vw,1.15rem);color:var(--v6);margin-top:.35rem;letter-spacing:.04em;animation:ap 1s .2s ease both;}
+@keyframes ap{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:translateY(0)}}
+.reglas-chips{display:flex;gap:.65rem;justify-content:center;flex-wrap:wrap;margin:1.2rem 0 1.5rem;animation:ap 1s .35s ease both;}
+.chip{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:22px;padding:.3rem .8rem;font-size:.76rem;color:rgba(255,255,255,.58);display:flex;align-items:center;gap:.35rem;}
+.modo-lbl{font-family:'Space Mono',monospace;font-size:.7rem;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.09em;margin-bottom:.7rem;animation:ap 1s .4s ease both;}
+.modo-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:.85rem;max-width:700px;width:100%;margin:0 auto;animation:ap 1s .5s ease both;}
+@media(max-width:480px){.modo-grid{grid-template-columns:1fr;}}
+.modo-c{background:rgba(255,255,255,.055);border:1.5px solid rgba(82,183,136,.18);border-radius:17px;padding:1.15rem 1rem;cursor:pointer;transition:all .25s;text-align:left;position:relative;overflow:hidden;}
+.modo-c::before{content:'';position:absolute;inset:0;opacity:0;transition:opacity .28s;}
+.modo-c.b1::before{background:linear-gradient(135deg,rgba(82,183,136,.13),transparent);}
+.modo-c.b2::before{background:linear-gradient(135deg,rgba(45,106,200,.13),transparent);}
+.modo-c.b3::before{background:linear-gradient(135deg,rgba(106,180,45,.13),transparent);}
+.modo-c.b4::before{background:linear-gradient(135deg,rgba(200,130,45,.13),transparent);}
+.modo-c.todo{grid-column:1/-1;border-color:rgba(240,192,64,.32);background:rgba(240,192,64,.06);}
+.modo-c.todo::before{background:linear-gradient(135deg,rgba(240,192,64,.13),transparent);}
+.modo-c:hover{transform:translateY(-3px);}
+.modo-c:hover::before{opacity:1;}
+.modo-badge{position:absolute;top:.65rem;right:.65rem;font-family:'Space Mono',monospace;font-size:.62rem;background:rgba(82,183,136,.18);border:1px solid rgba(82,183,136,.35);border-radius:9px;padding:.18rem .48rem;color:var(--v5);}
+.modo-c.todo .modo-badge{background:rgba(240,192,64,.18);border-color:rgba(240,192,64,.38);color:var(--dorado);}
+.modo-em{font-size:1.9rem;display:block;margin-bottom:.4rem;}
+.modo-n{font-family:'Playfair Display',serif;font-size:.95rem;font-weight:700;color:var(--dorado);margin-bottom:.22rem;}
+.modo-d{font-size:.75rem;color:rgba(255,255,255,.5);line-height:1.5;}
+
+/* HUD */
+.hud{display:flex;justify-content:space-between;align-items:center;background:rgba(0,0,0,.42);backdrop-filter:blur(10px);border-radius:15px;padding:.7rem 1.25rem;margin-bottom:.9rem;border:1px solid rgba(82,183,136,.16);flex-wrap:wrap;gap:.65rem;max-width:800px;width:100%;margin-left:auto;margin-right:auto;}
+.hi{display:flex;align-items:center;gap:.42rem;font-family:'Space Mono',monospace;font-size:.8rem;color:var(--v6);}
+.hi .val{font-size:1rem;font-weight:700;color:var(--dorado);}
+.vidas-d{display:flex;gap:3px;}
+.cor{font-size:1.05rem;transition:all .3s;}
+.cor.p{opacity:.2;filter:grayscale(1);}
+.prog-w{max-width:800px;width:100%;margin:0 auto .85rem;}
+.prog-b{height:5px;background:rgba(255,255,255,.07);border-radius:10px;overflow:hidden;}
+.prog-f{height:100%;background:linear-gradient(90deg,var(--v3),var(--v5),var(--dorado));border-radius:10px;transition:width .5s ease;box-shadow:0 0 7px rgba(82,183,136,.45);}
+.prog-t{font-family:'Space Mono',monospace;font-size:.68rem;color:rgba(255,255,255,.32);text-align:right;margin-top:3px;}
+
+/* TARJETA */
+.tarjeta{background:rgba(255,255,255,.055);backdrop-filter:blur(16px);border:1px solid rgba(82,183,136,.2);border-radius:21px;padding:1.55rem 1.75rem;max-width:800px;width:100%;margin:0 auto .85rem;animation:dsl .38s ease;}
+@keyframes dsl{from{opacity:0;transform:translateX(22px)}to{opacity:1;transform:translateX(0)}}
+.etq{display:inline-flex;align-items:center;gap:.38rem;background:rgba(82,183,136,.14);border:1px solid rgba(82,183,136,.28);border-radius:18px;padding:.26rem .78rem;font-family:'Space Mono',monospace;font-size:.66rem;color:var(--v5);text-transform:uppercase;letter-spacing:.06em;margin-bottom:.85rem;}
+.ctx{background:rgba(212,168,71,.09);border-left:3px solid var(--oro);border-radius:0 9px 9px 0;padding:.72rem .88rem;font-size:.83rem;color:rgba(255,255,255,.7);font-style:italic;margin-bottom:1rem;line-height:1.6;}
+.ctx strong{color:var(--oro);font-style:normal;}
+.txt-q{font-family:'Playfair Display',serif;font-size:clamp(.92rem,2.1vw,1.14rem);font-weight:700;line-height:1.5;color:var(--crema);margin-bottom:1.2rem;}
+.ops-g{display:grid;grid-template-columns:1fr 1fr;gap:.6rem;}
+@media(max-width:520px){.ops-g{grid-template-columns:1fr;}}
+.op{display:flex;align-items:flex-start;gap:.7rem;background:rgba(255,255,255,.053);border:1.5px solid rgba(255,255,255,.1);border-radius:12px;padding:.82rem .92rem;cursor:pointer;transition:all .2s;text-align:left;color:var(--crema);font-family:'Lora',serif;font-size:.84rem;line-height:1.5;}
+.op .lt{font-family:'Space Mono',monospace;font-weight:700;font-size:.83rem;color:var(--v5);flex-shrink:0;width:21px;height:21px;background:rgba(82,183,136,.17);border-radius:5px;display:flex;align-items:center;justify-content:center;margin-top:1px;transition:all .2s;}
+.op:hover:not(:disabled){border-color:var(--v5);background:rgba(82,183,136,.12);transform:translateY(-2px);}
+.op:hover:not(:disabled) .lt{background:var(--v5);color:#fff;}
+.op.ok{border-color:#52b788;background:rgba(82,183,136,.2);animation:bv .45s ease;}
+.op.ok .lt{background:var(--v5);color:#fff;}
+.op.mal{border-color:#e07b6a;background:rgba(224,123,106,.17);animation:shk .38s ease;}
+.op.mal .lt{background:#e07b6a;color:#fff;}
+.op.eli{opacity:.25;pointer-events:none;text-decoration:line-through;}
+.op:disabled{cursor:default;}
+@keyframes bv{0%,100%{box-shadow:0 0 0 transparent}50%{box-shadow:0 0 20px rgba(82,183,136,.52)}}
+@keyframes shk{0%,100%{transform:translateX(0)}25%,75%{transform:translateX(-4px)}50%{transform:translateX(4px)}}
+
+/* AYUDAS */
+.ayudas{display:flex;gap:.58rem;justify-content:center;max-width:800px;width:100%;margin:0 auto;flex-wrap:wrap;}
+.ay{display:flex;align-items:center;gap:.42rem;background:rgba(255,255,255,.06);border:1px solid rgba(212,168,71,.33);border-radius:20px;padding:.48rem .95rem;cursor:pointer;color:var(--oro);font-family:'Space Mono',monospace;font-size:.7rem;transition:all .2s;}
+.ay:hover:not(:disabled){background:rgba(212,168,71,.16);border-color:var(--dorado);transform:translateY(-2px);}
+.ay:disabled{opacity:.27;cursor:not-allowed;}
+
+/* FEEDBACK */
+.fb{display:none;max-width:800px;width:100%;margin:.75rem auto 0;background:rgba(0,0,0,.43);border-radius:14px;padding:1rem 1.3rem;border-left:4px solid var(--v5);animation:ap .3s ease;}
+.fb.vis{display:block;}
+.fb.err{border-left-color:#e07b6a;}
+.fb-t{font-family:'Playfair Display',serif;font-size:.97rem;margin-bottom:.38rem;}
+.fb-t.ok{color:var(--v5);}
+.fb-t.fail{color:#e07b6a;}
+.fb-x{font-size:.82rem;color:rgba(255,255,255,.7);line-height:1.6;}
+.btn-sig{margin-top:.8rem;font-family:'Space Mono',monospace;font-size:.77rem;font-weight:700;text-transform:uppercase;background:var(--v3);color:#fff;border:none;border-radius:20px;padding:.52rem 1.5rem;cursor:pointer;transition:all .2s;letter-spacing:.05em;}
+.btn-sig:hover{background:var(--v5);transform:translateY(-2px);}
+
+/* RESULTADO */
+.cir{width:165px;height:165px;border-radius:50%;border:5px solid var(--v5);display:flex;flex-direction:column;align-items:center;justify-content:center;margin:1.4rem auto;background:rgba(82,183,136,.11);animation:pul 2.5s ease-in-out infinite;}
+@keyframes pul{0%,100%{box-shadow:0 0 18px rgba(82,183,136,.26)}50%{box-shadow:0 0 42px rgba(82,183,136,.52)}}
+.cir-n{font-family:'Playfair Display',serif;font-size:3rem;font-weight:900;color:var(--dorado);line-height:1;}
+.cir-s{font-family:'Space Mono',monospace;font-size:.8rem;color:var(--v6);}
+.med{font-size:3.6rem;animation:gir 1s ease;}
+@keyframes gir{from{transform:rotateY(0) scale(0)}to{transform:rotateY(360deg) scale(1)}}
+.rt{font-family:'Playfair Display',serif;font-size:clamp(1.35rem,3.8vw,2.2rem);color:var(--dorado);margin-bottom:.38rem;}
+.rs{font-style:italic;color:var(--v6);font-size:.93rem;margin-bottom:1.6rem;max-width:480px;}
+.stats{display:flex;gap:1.1rem;justify-content:center;margin-bottom:1.6rem;flex-wrap:wrap;}
+.st{text-align:center;background:rgba(255,255,255,.055);border-radius:12px;padding:.85rem 1.2rem;min-width:95px;border:1px solid rgba(82,183,136,.16);}
+.st-n{font-family:'Space Mono',monospace;font-size:1.55rem;font-weight:700;color:var(--dorado);display:block;}
+.st-l{font-size:.7rem;color:rgba(255,255,255,.42);text-transform:uppercase;letter-spacing:.06em;}
+.btns{display:flex;gap:.8rem;flex-wrap:wrap;justify-content:center;}
+.btn-p{font-family:'Space Mono',monospace;font-size:.95rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;background:linear-gradient(135deg,var(--v3),var(--v5));color:#fff;border:none;border-radius:45px;padding:.85rem 2.3rem;cursor:pointer;transition:all .28s;box-shadow:0 5px 22px rgba(82,183,136,.35);}
+.btn-p:hover{transform:translateY(-3px);box-shadow:0 10px 30px rgba(82,183,136,.45);}
+.btn-s{font-family:'Space Mono',monospace;font-size:.8rem;font-weight:700;text-transform:uppercase;background:transparent;color:var(--v5);border:1.5px solid var(--v5);border-radius:22px;padding:.62rem 1.5rem;cursor:pointer;transition:all .2s;letter-spacing:.05em;}
+.btn-s:hover{background:rgba(82,183,136,.12);transform:translateY(-2px);}
+.sep{width:65px;height:2px;background:linear-gradient(90deg,transparent,var(--v5),transparent);margin:.75rem auto;}
+.go-em{font-size:4.2rem;margin-bottom:.8rem;}
+
+/* RACHA */
+.racha-bdg{display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:linear-gradient(135deg,var(--oro),var(--dorado));color:#1a1a1a;font-family:'Playfair Display',serif;font-size:1.65rem;font-weight:900;padding:.85rem 1.9rem;border-radius:16px;z-index:150;animation:rach 1.6s ease forwards;pointer-events:none;}
+@keyframes rach{0%{opacity:0;transform:translate(-50%,-50%) scale(.4)}30%{opacity:1;transform:translate(-50%,-50%) scale(1.08)}70%{opacity:1;transform:translate(-50%,-50%) scale(1)}100%{opacity:0;transform:translate(-50%,-62%) scale(.9)}}
+
+/* MODAL */
+.mod-o{display:none;position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:200;align-items:center;justify-content:center;padding:20px;}
+.mod-o.vis{display:flex;}
+.mod-c{background:linear-gradient(145deg,var(--v2),var(--v3));border:2px solid var(--v5);border-radius:21px;padding:1.8rem;max-width:490px;width:100%;text-align:center;animation:ap .28s ease;box-shadow:0 18px 50px rgba(0,0,0,.52);}
+.mod-av{font-size:3rem;margin-bottom:.4rem;}
+.mod-t{font-family:'Playfair Display',serif;font-size:1.2rem;color:var(--dorado);margin-bottom:.85rem;}
+.mod-x{font-size:.87rem;line-height:1.7;color:var(--crema);margin-bottom:1.2rem;}
+.btn-cm{font-family:'Space Mono',monospace;font-size:.8rem;font-weight:700;background:var(--v3);color:#fff;border:none;border-radius:20px;padding:.62rem 1.7rem;cursor:pointer;transition:background .2s;}
+.btn-cm:hover{background:var(--v5);}
+
+/* CONFETI */
+.conf{position:fixed;top:-10px;animation:cf linear forwards;z-index:100;pointer-events:none;}
+@keyframes cf{from{transform:translateY(0) rotate(0deg);opacity:1}to{transform:translateY(105vh) rotate(700deg);opacity:0}}
+::-webkit-scrollbar{width:5px;}
+::-webkit-scrollbar-thumb{background:var(--v3);border-radius:8px;}
+
+/* ====== FONDOS FOTOGRÁFICOS ====== */
+/* Pantalla Inicio — sendero de bambú con luz */
+#p-inicio{
+  background:
+    linear-gradient(rgba(6,15,9,.70),rgba(13,31,22,.82)),
+    url('sendero-iluminado-denso-bosque-bamb%C3%BA-creando-enormes-sombras-en-suelo.webp')
+    center/cover no-repeat;
+}
+/* Pantalla Juego — guadual denso Jardín Botánico Medellín */
+#p-juego{
+  background:
+    linear-gradient(rgba(6,15,9,.76),rgba(13,31,22,.86)),
+    url('bosque-de-guadua-jardin-botanico-medellin.webp')
+    center/cover no-repeat;
+}
+/* Pantalla Game Over — raíces de guadua (volver a empezar) */
+#p-gameover{
+  background:
+    linear-gradient(rgba(6,15,9,.72),rgba(13,31,22,.84)),
+    url('BAMBU-6-raices.jpg')
+    center/cover no-repeat;
+}
+/* Pantalla Resultado/Medalla — arquitectura de guadua */
+#p-res{
+  background:
+    linear-gradient(rgba(6,15,9,.60),rgba(13,31,22,.76)),
+    url('Kiosco_SAM_AGB.jpg')
+    center/cover no-repeat;
+}
+
+/* Tarjetas de selección de bloque */
+.modo-c.b1{
+  background:
+    linear-gradient(rgba(13,31,22,.82),rgba(13,31,22,.82)),
+    url('guaduaAngustifoliaAgrupaNudosPrimerPlano.webp')
+    center/cover no-repeat;
+}
+.modo-c.b2{
+  background:
+    linear-gradient(rgba(13,31,22,.82),rgba(13,31,22,.82)),
+    url('guaduasCosechadas10.webp')
+    center/cover no-repeat;
+}
+.modo-c.b3{
+  background:
+    linear-gradient(rgba(13,31,22,.82),rgba(13,31,22,.82)),
+    url('viviendaGuadua.jpg')
+    center/cover no-repeat;
+}
+.modo-c.b4{
+  background:
+    linear-gradient(rgba(13,31,22,.82),rgba(13,31,22,.82)),
+    url('obrerosEnAccion.jpg')
+    center/cover no-repeat;
+}
+/* Hover: el ::before ya maneja el brillo; se refuerza la transición */
+.modo-c.b1:hover,.modo-c.b2:hover,.modo-c.b3:hover,.modo-c.b4:hover{
+  filter:brightness(1.10);
+}
+
+/* Modal Experto — sección transversal de tallo / nudo */
+.mod-c{
+  background:
+    linear-gradient(rgba(9,25,16,.88),rgba(29,58,42,.92)),
+    url('Secci%C3%B3nTransversalTallos.webp')
+    center/cover no-repeat;
+}
+</style>
+</head>
+<body>
+<div id="bg"></div>
+<div class="racha-bdg" id="racha-bdg"></div>
+
+<div class="mod-o" id="mod-exp">
+  <div class="mod-c">
+    <div class="mod-av">🌿</div>
+    <div class="mod-t">Consejo del Experto</div>
+    <div class="mod-x" id="mod-exp-x"></div>
+    <button class="btn-cm" onclick="cerrarModal()">Entendido ✓</button>
+  </div>
+</div>
+
+<!-- INICIO -->
+<div class="pantalla activa" id="p-inicio">
+  <div style="animation:ap 1s ease both">
+    <div class="logo-t">🎋 GUADUA QUEST</div>
+    <div class="logo-s">El juego del saber verde · Política pública de la guadua en Colombia</div>
+  </div>
+  <div class="reglas-chips">
+    <div class="chip">🌿 3 vidas</div>
+    <div class="chip">⏱️ 30 seg/pregunta</div>
+    <div class="chip">✂️ Ayuda 50/50</div>
+    <div class="chip">🌱 Consejo experto</div>
+    <div class="chip">🔥 Bonus por racha</div>
+  </div>
+  <div class="modo-lbl">Elige un bloque temático para comenzar</div>
+  <div class="modo-grid">
+    <div class="modo-c b1" onclick="iniciarJuego(0)">
+      <span class="modo-badge">12 preguntas</span>
+      <span class="modo-em">📋</span>
+      <div class="modo-n">Bloque 1 · Registro</div>
+      <div class="modo-d">Gestión y Registro Ambiental<br><em>Ley 2206 · Decreto 1532 · PND</em></div>
+    </div>
+    <div class="modo-c b2" onclick="iniciarJuego(1)">
+      <span class="modo-badge">6 preguntas</span>
+      <span class="modo-em">🚛</span>
+      <div class="modo-n">Bloque 2 · Movilización</div>
+      <div class="modo-d">Transporte y Salvoconducto<br><em>Res. 1909 de 2017 · SUNL · VITAL</em></div>
+    </div>
+    <div class="modo-c b3" onclick="iniciarJuego(2)">
+      <span class="modo-badge">6 preguntas</span>
+      <span class="modo-em">🌱</span>
+      <div class="modo-n">Bloque 3 · Fomento</div>
+      <div class="modo-d">Cadenas Productivas y Valor<br><em>Ley 811 · Res. 009 de 2021 · CNP</em></div>
+    </div>
+    <div class="modo-c b4" onclick="iniciarJuego(3)">
+      <span class="modo-badge">6 preguntas</span>
+      <span class="modo-em">💰</span>
+      <div class="modo-n">Bloque 4 · Control</div>
+      <div class="modo-d">Administrativo y Financiero<br><em>Ley 819 · Res. 1280 de 2010</em></div>
+    </div>
+    <div class="modo-c todo" onclick="iniciarJuego(4)">
+      <span class="modo-badge">🏆 30 preguntas</span>
+      <span class="modo-em">🎯</span>
+      <div class="modo-n">Desafío Completo — Los 4 Bloques</div>
+      <div class="modo-d">Pon a prueba todo tu conocimiento sobre la política integral de la guadua en Colombia</div>
+    </div>
+  </div>
+</div>
+
+<!-- JUEGO -->
+<div class="pantalla" id="p-juego">
+  <div class="hud">
+    <div class="hi"><span>🌿</span><div class="vidas-d" id="vidas-d"></div></div>
+    <div class="hi"><span>⭐</span><span class="val" id="h-pts">0</span><span>pts</span></div>
+    <div class="hi"><span>🔥</span><span class="val" id="h-racha">0</span><span>racha</span></div>
+    <div class="hi"><span>⏱️</span><span class="val" id="h-t">30</span><span>s</span></div>
+  </div>
+  <div class="prog-w">
+    <div class="prog-b"><div class="prog-f" id="prog-f" style="width:0%"></div></div>
+    <div class="prog-t" id="prog-t">Pregunta 1 de 12</div>
+  </div>
+  <div class="tarjeta" id="tarjeta">
+    <div class="etq" id="etq">📋 Bloque 1</div>
+    <div class="ctx" id="ctx"></div>
+    <div class="txt-q" id="txt-q"></div>
+    <div class="ops-g" id="ops-g"></div>
+  </div>
+  <div class="fb" id="fb">
+    <div class="fb-t" id="fb-t"></div>
+    <div class="fb-x" id="fb-x"></div>
+    <button class="btn-sig" onclick="siguientePregunta()">Siguiente →</button>
+  </div>
+  <div class="ayudas">
+    <button class="ay" id="a50" onclick="usar5050()">✂️ 50/50 <span id="c50" style="opacity:.52">(×2)</span></button>
+    <button class="ay" id="aexp" onclick="usarExperto()">🌿 Experto <span id="cexp" style="opacity:.52">(×2)</span></button>
+  </div>
+</div>
+
+<!-- GAME OVER -->
+<div class="pantalla" id="p-gameover">
+  <div class="go-em">🌱</div>
+  <div class="rt">¡Sin vidas!</div>
+  <div class="sep"></div>
+  <div class="rs">La guadua siempre rebrota — tú también puedes</div>
+  <div class="stats">
+    <div class="st"><span class="st-n" id="go-pts">0</span><span class="st-l">Puntos</span></div>
+    <div class="st"><span class="st-n" id="go-ok">0</span><span class="st-l">Correctas</span></div>
+    <div class="st"><span class="st-n" id="go-n">0</span><span class="st-l">Llegaste a</span></div>
+  </div>
+  <div class="btns">
+    <button class="btn-p" id="go-retry">🔄 Reintentar</button>
+    <button class="btn-s" onclick="mostrarInicio()">🏠 Inicio</button>
+  </div>
+</div>
+
+<!-- RESULTADO -->
+<div class="pantalla" id="p-res">
+  <div class="med" id="med"></div>
+  <div class="rt" id="res-t"></div>
+  <div class="rs" id="res-s"></div>
+  <div class="cir">
+    <span class="cir-n" id="cir-n">0</span>
+    <span class="cir-s" id="cir-s">puntos</span>
+  </div>
+  <div class="stats">
+    <div class="st"><span class="st-n" id="r-ok">0</span><span class="st-l">Correctas</span></div>
+    <div class="st"><span class="st-n" id="r-t">0s</span><span class="st-l">Prom/pregunta</span></div>
+    <div class="st"><span class="st-n" id="r-r">0</span><span class="st-l">Mejor racha</span></div>
+  </div>
+  <div class="btns">
+    <button class="btn-p" id="res-retry">🔄 Jugar de nuevo</button>
+    <button class="btn-s" onclick="mostrarInicio()">🏠 Inicio</button>
+  </div>
+</div>
+
+<audio id="au-ok" src="https://assets.mixkit.co/active_storage/sfx/2018/2018-preview.mp3" preload="auto"></audio>
+<audio id="au-err" src="https://assets.mixkit.co/active_storage/sfx/2955/2955-preview.mp3" preload="auto"></audio>
+<audio id="au-fin" src="https://assets.mixkit.co/active_storage/sfx/2000/2000-preview.mp3" preload="auto"></audio>
+
+<script>
+const BANCO=[
+  // BLOQUE 1 (12)
+  {b:"📋 Bloque 1 · Registro y Gestión Ambiental",art:"Ley 2206 de 2022, Art. 3°",ctx:"Un propietario desea clasificar su plantación de guadua establecida para recuperar un suelo degradado y proteger una cuenca hidrográfica.",q:"Según la ley, ¿en qué categoría se clasifican los guaduales plantados por el hombre con fines de recuperación de suelos y protección de cuencas?",ops:["Categoría 1: Guaduales naturales en áreas protectoras.","Categoría 2: Guaduales plantados con carácter protector y protector-productor.","Categoría 3: Guaduales plantados con carácter productor dentro de la Frontera Agrícola.","Categoría 4: Guaduales de aprovechamiento industrial irrestricto."],c:1,j:"La Ley 2206 define la Categoría 2 como guaduales plantados con carácter protector y protector-productor, exactamente el perfil de una plantación para recuperar suelos y proteger cuencas.",p:"Si el objetivo es PROTEGER el suelo y el agua, ¿qué categoría tendría la palabra 'protector' en su nombre?"},
+  {b:"📋 Bloque 1 · Registro y Gestión Ambiental",art:"Ley 2206 de 2022, Art. 4°",ctx:"Un empresario agroindustrial estableció una plantación de bambú con fines comerciales en un área apta dentro de la frontera agrícola identificada por la UPRA.",q:"¿Ante qué entidad deben registrarse los guaduales y bambusales clasificados como Categoría 3?",ops:["Ante el Ministerio de Ambiente y Desarrollo Sostenible.","Ante la Corporación Autónoma Regional (CAR) de su jurisdicción.","Ante el Instituto Colombiano Agropecuario (ICA).","Ante la Unidad de Planificación Rural Agropecuaria (UPRA)."],c:2,j:"El ICA (Instituto Colombiano Agropecuario) es la entidad encargada del registro para la Categoría 3, que corresponde a guaduales con fines productivos dentro de la frontera agrícola.",p:"Categoría 3 es de carácter AGROPECUARIO y productivo. ¿Qué entidad regula el sector agropecuario en Colombia?"},
+  {b:"📋 Bloque 1 · Registro y Gestión Ambiental",art:"Ley 2206 de 2022, Art. 4° (Parágrafo 1)",ctx:"Se busca incentivar el registro de áreas de conservación y manejo sostenible (Categorías 1 y 2) para asegurar la trazabilidad del recurso.",q:"Respecto a los costos de gestión para las Categorías 1 y 2, ¿cuál de las siguientes afirmaciones es correcta?",ops:["El registro y las visitas de verificación son totalmente gratuitos.","El registro tiene un costo, pero las visitas de seguimiento son gratuitas.","El registro no tiene costo, pero se aplicará cobro por las visitas de verificación y seguimiento.","Tanto el registro como las visitas tienen un costo fijado por el Ministerio de Agricultura."],c:2,j:"El registro es GRATUITO para Categorías 1 y 2 (incentivando la conservación), pero las visitas de verificación y seguimiento tienen costo según la Resolución 1280/2010.",p:"El Estado quiere INCENTIVAR el registro de guaduales de conservación. Pero las visitas técnicas son un servicio adicional que requiere recursos..."},
+  {b:"📋 Bloque 1 · Registro y Gestión Ambiental",art:"Ley 2206 de 2022, Art. 5°",ctx:"El Gobierno busca garantizar la trazabilidad de los productos de guadua y bambú mediante la articulación de datos espaciales.",q:"¿Con qué sistema de información se debe articular la generación de información geográfica de los guaduales y bambusales del país?",ops:["Con el Sistema de Información Ambiental de Colombia (SIAC).","Con el Registro Único de Usuarios del Recurso Hídrico.","Únicamente con el Catastro Multipropósito.","Con el Sistema de Información de Combustibles Líquidos (SICOM)."],c:0,j:"El artículo 5° indica que la información geográfica se debe articular con el SIAC (Sistema de Información Ambiental de Colombia), que también incluye el SNIF y el SMBYC.",p:"¿Qué sistema reúne TODA la información ambiental de Colombia? Su sigla empieza por 'Sistema de Información Ambiental de...'"},
+  {b:"📋 Bloque 1 · Registro y Gestión Ambiental",art:"Ley 2206 de 2022, Art. 11",ctx:"Varios propietarios con guaduales registrados de Categoría 2 y 3 desean unirse para realizar un manejo sostenible conjunto.",q:"¿Qué requisito previo deben cumplir los propietarios para poder conformar 'Núcleos Productivos'?",ops:["Haber obtenido una licencia ambiental global del Ministerio de Ambiente.","Haber registrado previamente sus guaduales ante la autoridad ambiental competente.","Ser parte de un resguardo indígena o territorio colectivo titulado.","Estar inscritos en la Cámara de Comercio como exportadores de madera."],c:1,j:"El registro ante la autoridad ambiental es el paso previo e indispensable para conformar Núcleos Productivos. Sin registro no hay trazabilidad, y sin trazabilidad no puede haber asociación reconocida.",p:"Para agruparse y hacer manejo conjunto, el Estado primero necesita saber QUÉ tienen y DÓNDE está. ¿Qué proceso permite eso?"},
+  {b:"📋 Bloque 1 · Registro y Gestión Ambiental",art:"Decreto 1532 de 2019, Art. 2.2.1.1.12.1",ctx:"El marco reglamentario define las clases de plantaciones para determinar quién ejerce la autoridad ambiental sobre ellas.",q:"¿Cuál es la característica principal de las 'Plantaciones forestales protectoras-productoras' según este decreto?",ops:["Son aquellas establecidas exclusivamente en áreas de reserva forestal nacional.","Son aquellas donde el aprovechamiento está condicionado al mantenimiento del efecto de protección del recurso.","Son plantaciones destinadas únicamente a la investigación científica sin fines comerciales.","Son plantaciones establecidas antes de la expedición de la Ley 2ª de 1959."],c:1,j:"La característica definitoria es el EQUILIBRIO: se puede aprovechar (producir), pero siempre y cuando se mantenga el efecto protector. Es la esencia del desarrollo sostenible aplicado al bosque.",p:"El nombre dice todo: 'protectora-PRODUCTORA'. ¿Cuál es la condición que impone esa dualidad entre proteger y producir?"},
+  {b:"📋 Bloque 1 · Plan Nacional de Desarrollo",art:"Ley 2294 de 2023, Art. 226",ctx:"El Gobierno busca resolver desafíos sociales y ambientales mediante misiones de innovación que generen una 'Colombia Potencia Mundial de la Vida'.",q:"¿Cuál de los siguientes tópicos está explícitamente incluido como una de las 'misiones' de CTeI en el actual PND?",ops:["La explotación intensiva de recursos minero-energéticos tradicionales.","El desarrollo de la bioeconomía.","El registro exclusivo de guaduales en zonas urbanas.","La eliminación de los incentivos para la reforestación."],c:1,j:"El Art. 226 de la Ley 2294 incluye la bioeconomía como eje de innovación dentro del PND, reconociendo el potencial de recursos biológicos como la guadua.",p:"El PND actual tiene como lema 'Colombia Potencia Mundial de la VIDA'. ¿Qué tipo de economía se basa en recursos vivos y biológicos?"},
+  {b:"📋 Bloque 1 · Plan Nacional de Desarrollo",art:"Ley 2294 de 2023, Art. 55",ctx:"Se busca permitir que comunidades en condiciones de vulnerabilidad aprovechen recursos de la biodiversidad en baldíos de la Nación dentro de zonas de reserva forestal.",q:"¿Cómo se denomina el mecanismo creado para otorgar el uso del recurso forestal a organizaciones campesinas?",ops:["Licencia Ambiental Global Productiva.","Contrato de Arrendamiento Forestal.","Concesión Forestal Campesina.","Título de Propiedad Privada Forestal."],c:2,j:"La Concesión Forestal Campesina es el mecanismo del Art. 55 que permite a organizaciones campesinas acceder al uso sostenible de recursos forestales y de biodiversidad en baldíos nacionales.",p:"No es propiedad, no es alquiler... es un derecho de uso temporal que el Estado 'concede'. ¿A quiénes? A comunidades del campo."},
+  {b:"📋 Bloque 1 · Plan Nacional de Desarrollo",art:"Ley 2294 de 2023, Art. 32",ctx:"Un municipio está actualizando su POT y debe priorizar las normas de protección ambiental y del ciclo del agua según la nueva jerarquía legal.",q:"¿Qué nivel ocupan las normas sobre conservación del ciclo del agua y cambio climático en la jerarquía de determinantes de ordenamiento territorial?",ops:["Nivel 1: Son de superior jerarquía y prevalencia.","Nivel 3: Están supeditadas al patrimonio cultural.","Nivel 6: Son secundarias a los proyectos turísticos.","No tienen nivel asignado, son discrecionales del alcalde."],c:0,j:"El Art. 32 sitúa al agua y la gestión ambiental en el Nivel 1 de la jerarquía — el más alto. Esto es clave para la guadua como protectora de cuencas.",p:"¿Puede haber vida, agricultura ni ciudad sin agua? El legislador colombiano tomó una decisión clara sobre la jerarquía del agua."},
+  {b:"📋 Bloque 1 · Concepto CNP",art:"Concepto CNP a las Bases del PND 2022-2026",ctx:"El Consejo Nacional de Planeación resalta el potencial de ciertas plantas para ofrecer alternativas de ingresos en zonas afectadas por el conflicto.",q:"¿En qué tipo de sistemas sugiere el CNP el uso de bambúes para ofrecer alternativas a poblaciones vulnerables en municipios PDET?",ops:["En sistemas de monocultivo industrial de exportación.","En agroforestería o sistemas de uso de la tierra con plantas leñosas perennes.","Únicamente en proyectos de infraestructura vial nacional.","En zonas destinadas exclusivamente a la minería de subsistencia."],c:1,j:"El CNP recomienda la agroforestería con bambú para zonas de paz: sistemas que combinan árboles y cultivos, generando ingresos mientras se restaura el entorno.",p:"El bambú crece junto a otras especies. ¿En qué sistema productivo se combinan plantas leñosas con cultivos o pastos?"},
+  {b:"📋 Bloque 1 · Línea de Tiempo Normativa",art:"Ley 2206 de 2022, Art. 3° (Categoría 2)",ctx:"Un propietario tiene una plantación de guadua establecida en 2008 y teme que la nueva ley de 2022 le exija requisitos que antes no existían.",q:"¿Qué disposición garantiza la vigencia de las plantaciones en áreas protectoras-productoras establecidas antes de la ley de 2022?",ops:["Deben registrarse nuevamente como si fueran bosques naturales.","Seguirán vigentes si fueron establecidas con anterioridad a la Ley 1450 de 2011.","Quedan automáticamente anuladas para priorizar la restauración natural.","Solo siguen vigentes si el propietario es una gran empresa agroindustrial."],c:1,j:"La Ley 2206 respeta la vigencia de plantaciones previas a la Ley 1450 de 2011, garantizando la seguridad jurídica de los propietarios que actuaron de buena fe.",p:"En derecho, los actos realizados ANTES de una nueva norma generalmente se respetan. ¿Cuál fue la ley de 2011 que marcó el hito normativo anterior?"},
+  {b:"📋 Bloque 1 · Registro ante el ICA",art:"Ley 2206 de 2022, Art. 4°",ctx:"La Ley 2206 remite a normas anteriores para fundamentar el registro comercial (Categoría 3) ante el ICA.",q:"¿En qué norma se fundamenta legalmente el registro de guaduales Categoría 3 ante el ICA y la definición de sus tarifas?",ops:["En el Código de Policía vigente.","En la Ley 1955 de 2019 (PND anterior).","En el Decreto Ley 2811 de 1974.","En la Ley 2ª de 1959."],c:1,j:"La Ley 2206 cita expresamente la Ley 1955 de 2019 (Plan Nacional de Desarrollo anterior) como base para el registro comercial ante el ICA y la definición de tarifas.",p:"El registro agropecuario ante el ICA fue establecido en el PND... ¿de qué año? Hint: fue el PND del gobierno INMEDIATAMENTE anterior al actual."},
+  // BLOQUE 2 (6)
+  {b:"🚛 Bloque 2 · Movilización y Transporte",art:"Ley 2206 de 2022, Art. 7°; Res. 1909 de 2017, Art. 1°",ctx:"Un productor de guadua de Categoría 2 necesita transportar sus productos en primer grado de transformación desde su finca hasta un centro de acopio.",q:"¿Cuál es el documento oficial y obligatorio para amparar la movilización de productos de guadua de las categorías 1 y 2 por el territorio nacional?",ops:["Guía de Movilización Interna del ICA.","Factura de venta con sello de la Alcaldía.","Salvoconducto Único Nacional en Línea (SUNL).","Certificado de Origen expedido por el Ministerio de Ambiente."],c:2,j:"El SUNL (Salvoconducto Único Nacional en Línea) es el instrumento obligatorio para amparar el transporte de guadua de categorías 1 y 2 por el territorio nacional.",p:"Su sigla describe exactamente lo que es: un documento que permite movilizarse, es único, nacional y se hace... ¿en línea?"},
+  {b:"🚛 Bloque 2 · Movilización y Transporte",art:"Resolución 1909 de 2017, Art. 1°",ctx:"Un transportador ha obtenido su salvoconducto para un cargamento de bambú, pero un derrumbe en la vía retrasó el viaje más de lo previsto.",q:"Según la normativa ambiental, ¿cuál es la validez general de un salvoconducto de movilización?",ops:["Es válido por 30 días calendario para múltiples viajes.","Es válido por una sola vez y por el tiempo indicado en el mismo documento.","Es válido durante todo el semestre en que fue expedido.","Tiene vigencia permanente siempre que la plantación esté registrada."],c:1,j:"El salvoconducto es de uso ÚNICO y con vigencia específica para el viaje indicado. Esto garantiza trazabilidad: cada movilización tiene su propio documento.",p:"La palabra 'salvoconducto' implica un permiso para un desplazamiento específico. ¿Tiene sentido que sirva para múltiples viajes o indefinidamente?"},
+  {b:"🚛 Bloque 2 · Movilización y Transporte",art:"Resolución 1909 de 2017, Art. 1°",ctx:"El Ministerio de Ambiente busca modernizar y centralizar los trámites ambientales para facilitar la trazabilidad de los recursos de la biodiversidad.",q:"¿A través de qué plataforma tecnológica se debe expedir exclusivamente el Salvoconducto Único Nacional en Línea (SUNL)?",ops:["A través del portal del Ministerio de Agricultura.","A través de la Ventanilla Integral de Trámites Ambientales en Línea (VITAL).","Mediante la plataforma de la Policía de Carreteras.","Únicamente de forma física en las oficinas de las CAR."],c:1,j:"La plataforma VITAL (Ventanilla Integral de Trámites Ambientales en Línea) centraliza la expedición del SUNL para todas las autoridades ambientales del país.",p:"Su nombre dice que es una 'Ventanilla Integral de Trámites Ambientales'. ¿Cuáles son las iniciales?"},
+  {b:"🚛 Bloque 2 · Movilización y Transporte",art:"Resolución 1909 de 2017, Art. 3°",ctx:"Una empresa fabrica muebles terminados de guadua y desea saber si necesita un salvoconducto para enviar sus productos finales a los almacenes de cadena.",q:"¿Qué tipo de productos están excluidos de la exigencia del Salvoconducto Único Nacional en Línea (SUNL)?",ops:["Los productos forestales primarios maderables.","La guadua en cepas de 4 metros.","Los especímenes de la diversidad biológica en segundo grado de transformación (productos terminados).","El bambú recolectado de bosques naturales."],c:2,j:"La Resolución 1909 excluye explícitamente el segundo grado de transformación (productos terminados como muebles). El control aplica a los recursos en bruto o con transformación primaria.",p:"Si el producto ya es un mueble terminado, ¿aún es un recurso natural que necesita control? ¿Qué grado de transformación lo convierte en producto final?"},
+  {b:"🚛 Bloque 2 · Movilización y Transporte",art:"Ley 2206 de 2022, Art. 7°",ctx:"Un gran productor de guadua comercial (Categoría 3) requiere movilizar su producción y consulta la Ley 2206 para saber qué documento debe utilizar.",q:"Para la Categoría 3, ¿quién es el encargado de implementar el salvoconducto único nacional y bajo qué fundamento legal?",ops:["El Ministerio de Ambiente, bajo la Resolución 1909 de 2017.","El Instituto Colombiano Agropecuario (ICA), con fundamento en la Ley 1955 de 2019.","La Superintendencia de Transporte, bajo el Código Nacional de Tránsito.","El Ministerio de Comercio, basándose en la Ley 811 de 2003."],c:1,j:"La Ley 2206 asigna la movilización comercial de Categoría 3 al ICA, con fundamento en la Ley 1955 de 2019 (PND 2018-2022), que otorgó al ICA competencias sobre el sector agropecuario.",p:"Categoría 3 es comercial y agropecuaria. ¿Cuál entidad tiene competencia sobre el sector agropecuario productivo?"},
+  {b:"🚛 Bloque 2 · Movilización y Transporte",art:"Decreto 1532 de 2019, Art. 2.2.1.1.1.1",ctx:"Es vital determinar qué productos requieren salvoconducto basándose en el nivel de procesamiento que han recibido directamente de las trozas.",q:"¿Cómo se definen los productos obtenidos directamente de las trozas como bloques, tablas o chapas, sin procesos industriales posteriores?",ops:["Productos de valor agregado industrial.","Productos forestales de transformación primaria.","Artesanías y productos terminados.","Residuos forestales aprovechables."],c:1,j:"Los 'productos forestales de transformación primaria' son aquellos obtenidos directamente de la materia prima (trozas) con procesamiento mínimo. Estos requieren salvoconducto por seguir siendo recursos forestales.",p:"'Primaria' significa lo primero que se hace con la materia prima en bruto. Si se obtiene directamente de la troza, ¿qué tipo de transformación es?"},
+  // BLOQUE 3 (6)
+  {b:"🌱 Bloque 3 · Fomento Productivo y Cadenas de Valor",art:"Resolución 009 de 2021, Art. 1°",ctx:"Un grupo de empresarios y productores de diferentes departamentos busca formalizar su integración ante el Gobierno para mejorar su competitividad.",q:"¿Bajo qué denominación oficial reconoció el Ministerio de Agricultura a la organización que articula a los actores del sector guadua/bambú en Colombia?",ops:["Asociación Nacional de Transformadores de Bambú.","Consejo Nacional de la Cadena Productiva de la Guadua/Bambú y su Agroindustria.","Federación Colombiana de Núcleos Productivos de Guadua.","Mesa Técnica de Fomento al Bambú y la Sostenibilidad."],c:1,j:"La Resolución 009 de 2021 del Ministerio de Agricultura reconoció oficialmente el 'Consejo Nacional de la Cadena Productiva de la Guadua/Bambú y su Agroindustria' como la instancia representativa del sector.",p:"Es un CONSEJO que representa a todos los eslabones de la cadena (productores, transformadores, comercializadores). Su nombre incluye tanto la planta como su industria."},
+  {b:"🌱 Bloque 3 · Fomento Productivo y Cadenas de Valor",art:"Ley 811 de 2003, Art. 1° (Parágrafo 1°)",ctx:"Para acceder a beneficios estatales, los actores deben demostrar que forman parte de una 'cadena' según los criterios legales de organización productiva.",q:"Según la ley, ¿qué se entiende por 'cadena' en el sector agropecuario y forestal?",ops:["Un gremio que agrupa exclusivamente a los grandes cultivadores de un producto.","Un conjunto de actividades articuladas técnica y económicamente desde el inicio de la producción hasta su comercialización final.","Un sistema de transporte diseñado para llevar productos del campo a la ciudad.","Una organización estatal encargada de fijar los precios de los insumos rurales."],c:1,j:"La definición legal de 'cadena' integra TODOS los eslabones: desde el productor de semillas hasta el comercializador final, articulados técnica y económicamente.",p:"Imagina una cadena de metal: ¿qué la hace una 'cadena'? Que todos los eslabones están conectados, desde el primero hasta el último."},
+  {b:"🌱 Bloque 3 · Fomento Productivo y Cadenas de Valor",art:"Ley 811 de 2003, Art. 102 (Parágrafo 1°)",ctx:"El Gobierno Nacional está diseñando una nueva política de exportación forestal y requiere el concepto de los expertos del sector guadua.",q:"¿En qué se constituyen legalmente las organizaciones de cadenas inscritas frente a las medidas de política que les conciernen?",ops:["En entes recaudadores de impuestos sectoriales.","En cuerpos consultivos del Gobierno Nacional y órganos de concertación permanente.","En tribunales de arbitramento para conflictos laborales rurales.","En agencias independientes para la expedición de salvoconductos."],c:1,j:"Las organizaciones de cadena son interlocutores válidos del Estado: son cuerpos consultivos y órganos de concertación. Esto les da poder de participación en las políticas que los afectan.",p:"Si el Gobierno va a tomar decisiones sobre tu sector, ¿no sería lógico que te 'consultara'? ¿Cuál sería el papel legal de esa consulta?"},
+  {b:"🌱 Bloque 3 · Fomento Productivo y Cadenas de Valor",art:"Ley 2206 de 2022, Art. 9°",ctx:"La Ley 2206 busca que los actores de la guadua dejen de ser vistos como informales y se conviertan en un renglón económico dinámico.",q:"¿Cuál es la finalidad principal de inscribir la cadena de la guadua y el bambú en la política de cadenas productivas de la Ley 811 de 2003?",ops:["Eliminar la competencia de productos importados.","Que los actores productivos tengan acceso a los instrumentos de política para la competitividad de las cadenas agropecuarias.","Reducir el número de hectáreas permitidas para el cultivo comercial.","Centralizar todas las ventas en una única bodega nacional."],c:1,j:"Inscribirse en la Ley 811 es el 'pase de entrada' para que el sector guadua acceda a los beneficios, créditos, subsidios e instrumentos de competitividad que el Estado ofrece a las cadenas formalizadas.",p:"¿Para qué sirve estar 'inscrito' en un sistema? Para acceder a los beneficios que ese sistema ofrece. ¿Qué beneficios ofrece la política de cadenas productivas?"},
+  {b:"🌱 Bloque 3 · Fomento Productivo y Cadenas de Valor",art:"Ley 2206 de 2022, Art. 10",ctx:"Un pequeño productor de agricultura familiar requiere un préstamo para tecnificar su proceso de aprovechamiento de guadua y busca amparar su inversión ante riesgos climáticos.",q:"¿Qué obligación impone esta ley a las instituciones financieras y compañías de seguros?",ops:["Deben condonar las deudas de los productores que tengan guaduales de Categoría 1.","Deben incluir en sus planes de crédito, fomento y cubrimiento los proyectos de plantación, manejo y uso de la guadua y el bambú.","Deben financiar únicamente a las empresas extranjeras que procesen bambú.","Deben entregar seguros gratuitos a todos los habitantes de zonas cafeteras."],c:1,j:"La ley ordena a bancos y aseguradoras incorporar la guadua y el bambú en sus portafolios. Esto democratiza el acceso al crédito para pequeños y medianos productores del sector.",p:"Para que el sector crezca, necesita financiamiento y protección contra riesgos. ¿A quiénes les corresponde proveer eso en la economía?"},
+  {b:"🌱 Bloque 3 · Fomento Productivo y Cadenas de Valor",art:"Concepto CNP a las Bases del PND 2022-2026 (Sector Ecológico)",ctx:"El Consejo Nacional de Planeación destaca el papel de los recursos naturales en la construcción de valor social en territorios afectados por la violencia.",q:"Dentro del marco de la 'Paz Total', ¿qué modelo económico se sugiere fortalecer mediante el uso sostenible del suelo y la economía forestal con bambúes para poblaciones vulnerables?",ops:["Economía de servicios financieros digitales.","Bioeconomía o economía forestal.","Extracción minera de gran escala.","Monocultivos industriales de exportación de ciclo corto."],c:1,j:"El CNP ve en la bioeconomía la ruta para la riqueza hídrica y social de los territorios PDET: una economía que usa los recursos biológicos de manera sostenible para generar bienestar comunitario.",p:"'Bio' significa vida. Una economía basada en recursos vivos (bosques, bambúes, biodiversidad) sin agotar su fuente, ¿cómo se llama?"},
+  // BLOQUE 4 (6)
+  {b:"💰 Bloque 4 · Control Administrativo y Financiero",art:"Ley 2206 de 2022, Art. 22",ctx:"El Gobierno Nacional debe asignar presupuesto para la ejecución de los programas de fomento de la guadua definidos en la Ley 2206 de 2022.",q:"¿A qué instrumentos deben ajustarse obligatoriamente las erogaciones (gastos) que se causen con la implementación de esta ley?",ops:["Únicamente al presupuesto anual de la Corporación Autónoma Regional (CAR).","Al Marco de Gasto de Mediano Plazo, en concordancia con el Marco Fiscal de Mediano Plazo y las normas orgánicas de presupuesto.","Exclusivamente a las donaciones que se reciban de la cooperación internacional.","A las utilidades netas que genere el sector de la construcción por el uso de guadua."],c:1,j:"El Art. 22 ordena que todos los gastos de implementación se ajusten al Marco Fiscal de Mediano Plazo (MFMP) y al Marco de Gasto de Mediano Plazo (MGMP), garantizando responsabilidad fiscal.",p:"Cualquier ley que genere gasto público en Colombia debe ser 'pagable'. ¿Con qué herramienta de planificación financiera verifica el Estado que puede costear un gasto a mediano plazo?"},
+  {b:"💰 Bloque 4 · Control Administrativo y Financiero",art:"Ley 819 de 2003, Art. 7°",ctx:"Se propone un nuevo proyecto de ley para dar un incentivo tributario a los exportadores de bambú, lo que implica una reducción de ingresos para la Nación.",q:"Según la Ley Orgánica de Presupuesto, ¿qué requisito debe cumplirse cuando un proyecto de ley ordena un gasto o otorga beneficios tributarios?",ops:["Debe ser aprobado por plebiscito popular en las zonas productoras.","El impacto fiscal debe hacerse explícito y ser compatible con el Marco Fiscal de Mediano Plazo.","No requiere análisis si el beneficio es para pequeños productores.","Debe contar con el aval escrito de la Cámara de Comercio de Bogotá."],c:1,j:"La Ley 819 de 2003 exige que todo proyecto con impacto fiscal muestre explícitamente ese impacto y que sea compatible con el MFMP. Es el principio de responsabilidad fiscal.",p:"Si el Estado va a cobrar menos impuestos o gastar más, ¿no debería verificar que puede 'aguantar' ese costo? ¿Con qué instrumento lo hace?"},
+  {b:"💰 Bloque 4 · Control Administrativo y Financiero",art:"Resolución 1280 de 2010, Art. 1°",ctx:"Una autoridad ambiental debe liquidar el cobro por la evaluación y seguimiento para un pequeño proyecto de manejo de guadua cuyo valor total es inferior a 25 salarios mínimos mensuales vigentes (SMMV).",q:"¿Cuál es la tarifa máxima inicial establecida en esta resolución para proyectos menores a 25 SMMV?",ops:["$76.941 pesos (sujetos a actualización anual por IPC).","Tres salarios mínimos mensuales vigentes.","El 5% del valor total de la propiedad.","Es un trámite totalmente gratuito para cualquier escala."],c:0,j:"La Resolución 1280 define una escala específica para proyectos pequeños: una tarifa inicial de $76.941 pesos (actualizable por IPC anualmente), garantizando proporcionalidad en el cobro.",p:"Es una tarifa FIJA en pesos para el rango más pequeño, no un porcentaje ni gratuito. Se actualiza cada año con el Índice de Precios al Consumidor (IPC)."},
+  {b:"💰 Bloque 4 · Control Administrativo y Financiero",art:"Resolución 1280 de 2010, Art. 2°",ctx:"La autoridad ambiental debe calcular exactamente cuánto cobrarle a un usuario por una visita de seguimiento a su guadual registrado.",q:"¿Qué herramienta técnica deben adoptar obligatoriamente las autoridades ambientales para liquidar estas tarifas?",ops:["El sistema de subasta de servicios ambientales.","La Tabla Única que incluye honorarios de profesionales, gastos de viaje y costos de laboratorio.","Un porcentaje fijo del 10% sobre la facturación de la empresa.","El manual de tarifas del Instituto Colombiano Agropecuario (ICA)."],c:1,j:"La 'Tabla Única' es el instrumento obligatorio para garantizar transparencia y uniformidad en el cobro de servicios de evaluación y seguimiento ambiental, evitando arbitrariedades.",p:"Se llama 'tabla' porque organiza los costos en una estructura clara. Y es 'única' porque todos deben usar la misma. ¿Qué incluye esa tabla?"},
+  {b:"💰 Bloque 4 · Control Administrativo y Financiero",art:"Ley 819 de 2003, Art. 12",ctx:"Un Alcalde desea contratar la construcción de un puente de guadua que tomará 18 meses, comprometiendo presupuesto de la vigencia actual y del año siguiente.",q:"¿Qué requisito debe cumplirse para que un municipio pueda autorizar obligaciones que afecten presupuestos de vigencias futuras ordinarias?",ops:["Que la obra sea declarada como 'Patrimonio de la Humanidad'.","Que se cuente con una apropiación mínima del 15% en la vigencia fiscal en la que se autoricen.","Que el Alcalde tenga más de 4 años de experiencia en gestión pública.","Que la Nación cofinancie el 100% de la obra mediante el SGP."],c:1,j:"El Art. 12 de la Ley 819 exige tener presupuestado al menos el 15% del valor total en la vigencia actual como garantía de compromiso. Esto evita el sobreendeudamiento territorial.",p:"Para comprometer dinero del 'presupuesto del año siguiente', el Estado exige un porcentaje mínimo de 'pie de amigo' en el presupuesto ACTUAL. ¿Cuánto es ese porcentaje?"},
+  {b:"💰 Bloque 4 · Control Administrativo y Financiero",art:"Ley 1955 de 2019, Art. 18",ctx:"Se busca fortalecer financieramente a las entidades de control y regulación para que la cadena productiva sea transparente.",q:"¿Cuál es el tope máximo de la contribución especial anual que pueden cobrar entidades como la Superintendencia de Servicios Públicos para financiar su funcionamiento?",ops:["El 10% de los activos fijos de las empresas.","El 1% de la base gravable definida por los costos y gastos totales depurados.","Un salario mínimo por cada hectárea de guadua plantada.","El 50% de las utilidades después de impuestos."],c:1,j:"La Ley 1955 define un límite del 1% sobre los costos y gastos depurados como contribución máxima para la vigilancia y control. Esto garantiza proporcionalidad en el financiamiento de la supervisión.",p:"Es un porcentaje muy pequeño (1 cifra de 1 dígito) calculado sobre la base de costos y gastos de la empresa. ¿Qué porcentaje sería proporcional para financiar la entidad de control?"}
+];
+
+// Índices por bloque
+const BLOQUES_IDX = [[0,12],[12,18],[18,24],[24,30]];
+
+let E={pqs:[],idx:0,pts:0,vidas:3,racha:0,mrach:0,ok:0,a50:2,aexp:2,resp:false,tiem:30,timer:null,tT:0,nR:0,modo:0};
+
+// FONDO
+function crearFondo(){
+  const bg=document.getElementById('bg');
+  const cs=['#1b4332','#2d6a4f','#40916c','#52b788'];
+  for(let i=0;i<20;i++){
+    const c=document.createElement('div');c.className='cana';
+    const h=180+Math.random()*480;
+    c.style.cssText=`height:${h}px;left:${i*5}%;width:${14+Math.random()*7}px;background:linear-gradient(180deg,${cs[i%4]},${cs[(i+2)%4]});opacity:${.11+Math.random()*.18};animation-delay:${Math.random()*5}s;animation-duration:${4+Math.random()*3}s;`;
+    for(let j=0;j<Math.floor(h/52);j++){const n=document.createElement('div');n.style.cssText=`position:absolute;bottom:${j*52+26}px;left:0;right:0;height:2px;background:rgba(0,0,0,.22);border-radius:2px`;c.appendChild(n);}
+    bg.appendChild(c);
+  }
+  for(let i=0;i<12;i++){const h=document.createElement('div');h.className='hoja-a';h.style.cssText=`width:${30+Math.random()*70}px;height:${15+Math.random()*32}px;background:${['#52b788','#40916c','#2d6a4f'][i%3]};position:absolute;top:${Math.random()*85}%;left:${Math.random()*100}%;opacity:.12;transform:rotate(${Math.random()*70-35}deg);animation-delay:${Math.random()*9}s;animation-duration:${7+Math.random()*6}s;`;bg.appendChild(h);}
+  setInterval(()=>{const p=document.createElement('div');p.className='burbuja';const sz=3+Math.random()*7;p.style.cssText=`width:${sz}px;height:${sz}px;left:${Math.random()*100}vw;bottom:0;background:rgba(82,183,136,${.06+Math.random()*.1});animation-duration:${8+Math.random()*12}s;`;document.body.appendChild(p);setTimeout(()=>p.remove(),22000);},1800);
+}
+
+function pantalla(id){document.querySelectorAll('.pantalla').forEach(p=>p.classList.remove('activa'));document.getElementById(id).classList.add('activa');}
+function mostrarInicio(){pantalla('p-inicio');}
+
+function iniciarJuego(modo){
+  E.modo=modo;
+  if(modo===4){
+    // mezcla todas
+    E.pqs=[...BANCO].sort(()=>Math.random()-.5);
+  } else {
+    const [a,b]=BLOQUES_IDX[modo];
+    E.pqs=BANCO.slice(a,b);
+  }
+  E.idx=0;E.pts=0;E.vidas=3;E.racha=0;E.mrach=0;E.ok=0;E.a50=2;E.aexp=2;E.resp=false;E.tT=0;E.nR=0;
+  document.getElementById('go-retry').onclick=()=>iniciarJuego(modo);
+  document.getElementById('res-retry').onclick=()=>iniciarJuego(modo);
+  actuHUD();
+  pantalla('p-juego');
+  cargarQ();
+}
+
+function cargarQ(){
+  if(E.idx>=E.pqs.length){fin();return;}
+  const q=E.pqs[E.idx];E.resp=false;
+  const t=document.getElementById('tarjeta');t.style.animation='none';t.offsetHeight;t.style.animation='dsl .38s ease';
+  document.getElementById('etq').textContent=q.b;
+  document.getElementById('ctx').innerHTML=`<strong>Contexto:</strong> ${q.ctx} <em style="display:block;margin-top:3px;font-size:.75rem;color:rgba(255,255,255,.38)">📋 ${q.art}</em>`;
+  document.getElementById('txt-q').textContent=q.q;
+  const g=document.getElementById('ops-g');g.innerHTML='';
+  ['A','B','C','D'].forEach((l,i)=>{
+    const b=document.createElement('button');b.className='op';b.id=`op${i}`;b.onclick=()=>responder(i);
+    b.innerHTML=`<span class="lt">${l}</span><span>${q.ops[i]}</span>`;g.appendChild(b);
+  });
+  document.getElementById('fb').classList.remove('vis','err');
+  document.getElementById('a50').disabled=E.a50<=0;
+  document.getElementById('aexp').disabled=E.aexp<=0;
+  document.getElementById('c50').textContent=`(×${E.a50})`;
+  document.getElementById('cexp').textContent=`(×${E.aexp})`;
+  document.getElementById('prog-f').style.width=(E.idx/E.pqs.length*100)+'%';
+  document.getElementById('prog-t').textContent=`Pregunta ${E.idx+1} de ${E.pqs.length}`;
+  startTimer();
+}
+
+function startTimer(){
+  clearInterval(E.timer);E.tiem=30;
+  const el=document.getElementById('h-t');el.textContent=30;el.style.color='var(--dorado)';
+  E.timer=setInterval(()=>{E.tiem--;el.textContent=E.tiem;el.style.color=E.tiem<=10?'#e07b6a':'var(--dorado)';if(E.tiem<=0){clearInterval(E.timer);if(!E.resp)timeout();}},1000);
+}
+function timeout(){
+  E.resp=true;E.racha=0;perderVida();
+  const q=E.pqs[E.idx];
+  document.getElementById(`op${q.c}`).classList.add('ok');
+  mostrarFb(false,'⏰ ¡Se acabó el tiempo!',`Correcta: ${['A','B','C','D'][q.c]}. ${q.j}`);
+  disOps();
+}
+function responder(i){
+  if(E.resp)return;clearInterval(E.timer);E.resp=true;E.nR++;
+  const q=E.pqs[E.idx];const tu=30-E.tiem;E.tT+=tu;
+  const ok=i===q.c;
+  document.getElementById(`op${i}`).classList.add(ok?'ok':'mal');
+  if(ok){
+    const bv=tu<10?30:tu<20?15:0;E.racha++;const br=E.racha>=3?15*(E.racha-2):0;
+    const pts=100+bv+br;E.pts+=pts;E.ok++;
+    if(E.racha>E.mrach)E.mrach=E.racha;
+    reproducir('ok');if(E.racha>=3)rachaBadge(E.racha);if(E.racha>=5)confeti();
+    mostrarFb(true,`✅ ¡Correcto! +${pts} pts`,q.j+(bv?` 🚀 Bonus velocidad +${bv}!`:'')+(br?` 🔥 Bonus racha +${br}!`:''));
+  } else {
+    document.getElementById(`op${q.c}`).classList.add('ok');E.racha=0;reproducir('err');perderVida();
+    mostrarFb(false,'❌ Incorrecto',`Correcta: opción ${['A','B','C','D'][q.c]}. ${q.j}`);
+  }
+  disOps();actuHUD();
+}
+function disOps(){document.querySelectorAll('.op').forEach(b=>b.disabled=true);}
+function perderVida(){E.vidas--;actuVidas();if(E.vidas<=0)setTimeout(gameOver,1600);}
+function actuVidas(){const d=document.getElementById('vidas-d');d.innerHTML='';for(let i=0;i<3;i++){const c=document.createElement('span');c.className='cor'+(i>=E.vidas?' p':'');c.textContent='🌿';d.appendChild(c);}}
+function actuHUD(){document.getElementById('h-pts').textContent=E.pts;document.getElementById('h-racha').textContent=E.racha;actuVidas();}
+function mostrarFb(ok,t,x){const b=document.getElementById('fb');b.classList.add('vis');b.classList.toggle('err',!ok);const el=document.getElementById('fb-t');el.textContent=t;el.className='fb-t '+(ok?'ok':'fail');document.getElementById('fb-x').textContent=x;}
+function siguientePregunta(){E.idx++;if(E.vidas>0)cargarQ();}
+function gameOver(){clearInterval(E.timer);document.getElementById('go-pts').textContent=E.pts;document.getElementById('go-ok').textContent=E.ok;document.getElementById('go-n').textContent=E.idx+1;pantalla('p-gameover');}
+function fin(){
+  clearInterval(E.timer);reproducir('fin');confeti();
+  const tot=E.pqs.length,pct=Math.round(E.ok/tot*100);
+  let m,t,s;
+  if(pct>=90){m='🏆';t='¡Experto en Guadua!';s='Dominas la normativa como la guadua domina las laderas. ¡Sobresaliente!';}
+  else if(pct>=75){m='🥇';t='¡Conocedor Avanzado!';s='Tu comprensión de la política de guadua es sólida como el culmo.';}
+  else if(pct>=60){m='🥈';t='¡Buen Manejo!';s='Vas por buen camino. Repasa los artículos y vuelve a intentarlo.';}
+  else if(pct>=45){m='🥉';t='¡Aprendiz Verde!';s='Las bases están. Con práctica llegarás a experto.';}
+  else{m='🌱';t='Semilla de Conocimiento';s='Todo gran guadual empezó como una semilla. ¡Sigue estudiando!';}
+  document.getElementById('med').textContent=m;document.getElementById('res-t').textContent=t;document.getElementById('res-s').textContent=s;
+  document.getElementById('cir-n').textContent=E.pts;document.getElementById('cir-s').textContent=`${E.ok}/${tot} correctas`;
+  document.getElementById('r-ok').textContent=`${E.ok}/${tot}`;
+  document.getElementById('r-t').textContent=(E.nR>0?Math.round(E.tT/E.nR):0)+'s';
+  document.getElementById('r-r').textContent=E.mrach;
+  pantalla('p-res');
+}
+function usar5050(){
+  if(E.a50<=0||E.resp)return;E.a50--;
+  document.getElementById('c50').textContent=`(×${E.a50})`;if(E.a50<=0)document.getElementById('a50').disabled=true;
+  const q=E.pqs[E.idx];
+  [0,1,2,3].filter(i=>i!==q.c).sort(()=>Math.random()-.5).slice(0,2).forEach(i=>{const b=document.getElementById(`op${i}`);b.classList.add('eli');b.disabled=true;});
+}
+function usarExperto(){
+  if(E.aexp<=0||E.resp)return;E.aexp--;
+  document.getElementById('cexp').textContent=`(×${E.aexp})`;if(E.aexp<=0)document.getElementById('aexp').disabled=true;
+  const q=E.pqs[E.idx];
+  document.getElementById('mod-exp-x').innerHTML=`<em style="color:var(--v6);font-size:.78rem">📋 ${q.art}</em><br><br>💡 <strong>Pista:</strong> ${q.p}`;
+  document.getElementById('mod-exp').classList.add('vis');
+}
+function cerrarModal(){document.getElementById('mod-exp').classList.remove('vis');}
+function reproducir(t){try{const a=document.getElementById(t==='ok'?'au-ok':t==='err'?'au-err':'au-fin');if(a){a.currentTime=0;a.volume=.28;a.play().catch(()=>{});}}catch(e){}}
+function confeti(){
+  const cs=['#52b788','#d4a847','#f0c040','#95d5b2','#fff','#40916c','#e07b6a'];
+  for(let i=0;i<70;i++){
+    setTimeout(()=>{const c=document.createElement('div');c.className='conf';
+    c.style.cssText=`left:${Math.random()*100}vw;width:${5+Math.random()*9}px;height:${5+Math.random()*9}px;background:${cs[Math.floor(Math.random()*cs.length)]};border-radius:${Math.random()>.5?'50%':'2px'};animation-duration:${1.5+Math.random()*2}s;animation-delay:${Math.random()*.5}s;`;
+    document.body.appendChild(c);setTimeout(()=>c.remove(),3200);},i*22);
+  }
+}
+function rachaBadge(n){
+  const m={3:'🔥 ¡Racha ×3!',4:'⚡ ¡Racha ×4!',5:'🌟 ¡IMPARABLE ×5!',6:'🏆 ¡MAESTRO ×6!',7:'💎 ¡LEYENDA ×7+'};
+  const b=document.getElementById('racha-bdg');b.textContent=m[Math.min(n,7)]||`🔥 Racha ×${n}`;b.style.display='block';
+  setTimeout(()=>{b.style.display='none';},1700);
+}
+crearFondo();
+</script>
+</body>
+</html>

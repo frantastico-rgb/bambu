@@ -1,0 +1,1417 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🎋 Guadua Quest — El Juego del Saber Verde</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Lora:ital,wght@0,400;0,600;1,400&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --verde-oscuro: #1a3a2a;
+    --verde-medio: #2d6a4f;
+    --verde-claro: #52b788;
+    --verde-lima: #95d5b2;
+    --amarillo-bambu: #d4a847;
+    --dorado: #f0c040;
+    --tierra: #8b5e3c;
+    --crema: #fef9ef;
+    --blanco: #ffffff;
+    --sombra: rgba(0,0,0,0.4);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Lora', serif;
+    background: var(--verde-oscuro);
+    color: var(--crema);
+    min-height: 100vh;
+    overflow-x: hidden;
+    position: relative;
+  }
+
+  /* === FONDO ANIMADO CON GUADUALES SVG === */
+  #bambu-bg {
+    position: fixed; inset: 0;
+    z-index: 0;
+    overflow: hidden;
+    background: linear-gradient(180deg, #0d1f16 0%, #1a3a2a 40%, #2d6a4f 100%);
+  }
+
+  .caña {
+    position: absolute;
+    bottom: 0;
+    width: 18px;
+    border-radius: 6px;
+    transform-origin: bottom center;
+    animation: mecerse 4s ease-in-out infinite;
+  }
+
+  @keyframes mecerse {
+    0%, 100% { transform: rotate(-2deg); }
+    50%       { transform: rotate(2deg); }
+  }
+
+  .hoja-bg {
+    position: absolute;
+    border-radius: 50% 0 50% 0;
+    opacity: 0.15;
+    animation: flotar 8s ease-in-out infinite;
+  }
+
+  @keyframes flotar {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    50%       { transform: translateY(-20px) rotate(5deg); }
+  }
+
+  /* === PANTALLAS === */
+  .pantalla {
+    position: relative; z-index: 10;
+    display: none;
+    min-height: 100vh;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    padding: 20px;
+    text-align: center;
+  }
+
+  .pantalla.activa { display: flex; }
+
+  /* === PANTALLA INICIO === */
+  #pantalla-inicio .logo-titulo {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2.5rem, 7vw, 5.5rem);
+    font-weight: 900;
+    line-height: 1.1;
+    color: var(--dorado);
+    text-shadow: 0 4px 20px rgba(240,192,64,0.4), 0 0 60px rgba(82,183,136,0.3);
+    margin-bottom: 0.2em;
+    animation: aparecer 1s ease both;
+  }
+
+  @keyframes aparecer {
+    from { opacity: 0; transform: translateY(30px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .subtitulo-inicio {
+    font-style: italic;
+    font-size: clamp(1rem, 3vw, 1.35rem);
+    color: var(--verde-lima);
+    margin-bottom: 2.5rem;
+    animation: aparecer 1s 0.3s ease both;
+    max-width: 600px;
+  }
+
+  .tarjeta-intro {
+    background: rgba(255,255,255,0.07);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(82,183,136,0.3);
+    border-radius: 20px;
+    padding: 2rem 2.5rem;
+    max-width: 680px;
+    margin-bottom: 2rem;
+    animation: aparecer 1s 0.5s ease both;
+    text-align: left;
+  }
+
+  .tarjeta-intro h3 {
+    font-family: 'Playfair Display', serif;
+    color: var(--dorado);
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+    text-align: center;
+  }
+
+  .reglas-lista {
+    list-style: none;
+    display: grid;
+    gap: 0.6rem;
+  }
+
+  .reglas-lista li {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    font-size: 0.95rem;
+    color: var(--verde-lima);
+  }
+
+  .reglas-lista li span.icono {
+    font-size: 1.3rem;
+    flex-shrink: 0;
+  }
+
+  .btn-principal {
+    font-family: 'Space Mono', monospace;
+    font-size: 1.1rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    background: linear-gradient(135deg, var(--verde-medio), var(--verde-claro));
+    color: white;
+    border: none;
+    border-radius: 50px;
+    padding: 1rem 3rem;
+    cursor: pointer;
+    transition: all 0.3s;
+    animation: aparecer 1s 0.8s ease both;
+    box-shadow: 0 6px 30px rgba(82,183,136,0.4);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .btn-principal::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: linear-gradient(135deg, transparent, rgba(255,255,255,0.2));
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .btn-principal:hover { transform: translateY(-3px); box-shadow: 0 12px 40px rgba(82,183,136,0.5); }
+  .btn-principal:hover::before { opacity: 1; }
+  .btn-principal:active { transform: translateY(0); }
+
+  /* === PANTALLA JUEGO === */
+  #pantalla-juego {
+    padding: 15px;
+    gap: 0;
+    align-items: stretch;
+  }
+
+  .hud {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(0,0,0,0.35);
+    backdrop-filter: blur(8px);
+    border-radius: 16px;
+    padding: 0.8rem 1.4rem;
+    margin-bottom: 1.2rem;
+    border: 1px solid rgba(82,183,136,0.2);
+    flex-wrap: wrap;
+    gap: 0.8rem;
+    max-width: 780px;
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .hud-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.85rem;
+    color: var(--verde-lima);
+  }
+
+  .hud-item .val {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--dorado);
+  }
+
+  .vidas-display { display: flex; gap: 4px; }
+  .corazon { font-size: 1.2rem; transition: all 0.3s; }
+  .corazon.perdido { opacity: 0.2; filter: grayscale(1); }
+
+  .barra-progreso-wrap {
+    max-width: 780px;
+    width: 100%;
+    margin: 0 auto 1rem;
+    position: relative;
+  }
+
+  .barra-progreso {
+    height: 6px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+
+  .barra-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--verde-medio), var(--verde-claro), var(--dorado));
+    border-radius: 10px;
+    transition: width 0.5s ease;
+    box-shadow: 0 0 10px rgba(82,183,136,0.6);
+  }
+
+  .pregunta-contador {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.75rem;
+    color: rgba(255,255,255,0.4);
+    text-align: right;
+    margin-top: 4px;
+  }
+
+  /* === TARJETA PREGUNTA === */
+  .tarjeta-pregunta {
+    background: rgba(255,255,255,0.06);
+    backdrop-filter: blur(16px);
+    border: 1px solid rgba(82,183,136,0.25);
+    border-radius: 24px;
+    padding: 1.8rem 2rem;
+    max-width: 780px;
+    width: 100%;
+    margin: 0 auto 1.2rem;
+    position: relative;
+    overflow: hidden;
+    animation: deslizar 0.4s ease;
+  }
+
+  @keyframes deslizar {
+    from { opacity: 0; transform: translateX(30px); }
+    to   { opacity: 1; transform: translateX(0); }
+  }
+
+  .etiqueta-tema {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    background: rgba(82,183,136,0.2);
+    border: 1px solid rgba(82,183,136,0.4);
+    border-radius: 20px;
+    padding: 0.3rem 0.9rem;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--verde-claro);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 1rem;
+  }
+
+  .contexto-pregunta {
+    background: rgba(212,168,71,0.1);
+    border-left: 3px solid var(--amarillo-bambu);
+    border-radius: 0 10px 10px 0;
+    padding: 0.8rem 1rem;
+    font-size: 0.88rem;
+    color: rgba(255,255,255,0.75);
+    font-style: italic;
+    margin-bottom: 1.2rem;
+    line-height: 1.6;
+  }
+
+  .contexto-pregunta strong {
+    color: var(--amarillo-bambu);
+    font-style: normal;
+  }
+
+  .texto-pregunta {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1rem, 2.5vw, 1.25rem);
+    font-weight: 700;
+    line-height: 1.5;
+    color: var(--crema);
+    margin-bottom: 1.5rem;
+  }
+
+  /* === OPCIONES === */
+  .opciones-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
+
+  @media (max-width: 560px) {
+    .opciones-grid { grid-template-columns: 1fr; }
+  }
+
+  .opcion-btn {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.8rem;
+    background: rgba(255,255,255,0.06);
+    border: 1.5px solid rgba(255,255,255,0.12);
+    border-radius: 14px;
+    padding: 0.9rem 1rem;
+    cursor: pointer;
+    transition: all 0.25s;
+    text-align: left;
+    color: var(--crema);
+    font-family: 'Lora', serif;
+    font-size: 0.88rem;
+    line-height: 1.5;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .opcion-btn .letra {
+    font-family: 'Space Mono', monospace;
+    font-weight: 700;
+    font-size: 0.9rem;
+    color: var(--verde-claro);
+    flex-shrink: 0;
+    width: 22px;
+    height: 22px;
+    background: rgba(82,183,136,0.2);
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 1px;
+    transition: all 0.25s;
+  }
+
+  .opcion-btn:hover:not(:disabled) {
+    border-color: var(--verde-claro);
+    background: rgba(82,183,136,0.15);
+    transform: translateY(-2px);
+  }
+
+  .opcion-btn:hover:not(:disabled) .letra {
+    background: var(--verde-claro);
+    color: white;
+  }
+
+  .opcion-btn.correcta {
+    border-color: #52b788;
+    background: rgba(82,183,136,0.25);
+    animation: brillar-verde 0.5s ease;
+  }
+
+  .opcion-btn.correcta .letra {
+    background: var(--verde-claro);
+    color: white;
+  }
+
+  .opcion-btn.incorrecta {
+    border-color: #e07b6a;
+    background: rgba(224,123,106,0.2);
+    animation: temblar 0.4s ease;
+  }
+
+  .opcion-btn.incorrecta .letra {
+    background: #e07b6a;
+    color: white;
+  }
+
+  .opcion-btn.eliminada {
+    opacity: 0.3;
+    pointer-events: none;
+    text-decoration: line-through;
+  }
+
+  .opcion-btn:disabled { cursor: default; }
+
+  @keyframes brillar-verde {
+    0%, 100% { box-shadow: 0 0 0 rgba(82,183,136,0); }
+    50%       { box-shadow: 0 0 25px rgba(82,183,136,0.6); }
+  }
+
+  @keyframes temblar {
+    0%, 100% { transform: translateX(0); }
+    20%, 60% { transform: translateX(-6px); }
+    40%, 80% { transform: translateX(6px); }
+  }
+
+  /* === AYUDAS === */
+  .ayudas-barra {
+    display: flex;
+    gap: 0.7rem;
+    justify-content: center;
+    max-width: 780px;
+    width: 100%;
+    margin: 0 auto;
+    flex-wrap: wrap;
+  }
+
+  .ayuda-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: rgba(255,255,255,0.07);
+    border: 1px solid rgba(212,168,71,0.4);
+    border-radius: 25px;
+    padding: 0.55rem 1.1rem;
+    cursor: pointer;
+    color: var(--amarillo-bambu);
+    font-family: 'Space Mono', monospace;
+    font-size: 0.75rem;
+    transition: all 0.25s;
+  }
+
+  .ayuda-btn:hover:not(:disabled) {
+    background: rgba(212,168,71,0.2);
+    border-color: var(--dorado);
+    transform: translateY(-2px);
+  }
+
+  .ayuda-btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+  }
+
+  .ayuda-btn .ayuda-icono { font-size: 1.1rem; }
+
+  /* === FEEDBACK === */
+  .feedback-box {
+    display: none;
+    max-width: 780px;
+    width: 100%;
+    margin: 1rem auto 0;
+    background: rgba(0,0,0,0.4);
+    border-radius: 16px;
+    padding: 1.2rem 1.5rem;
+    border-left: 4px solid var(--verde-claro);
+    animation: aparecer 0.4s ease;
+  }
+
+  .feedback-box.visible { display: block; }
+  .feedback-box.error { border-left-color: #e07b6a; }
+
+  .feedback-titulo {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.05rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .feedback-titulo.ok { color: var(--verde-claro); }
+  .feedback-titulo.fail { color: #e07b6a; }
+
+  .feedback-texto {
+    font-size: 0.87rem;
+    color: rgba(255,255,255,0.75);
+    line-height: 1.6;
+  }
+
+  .btn-siguiente {
+    margin-top: 1rem;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    background: var(--verde-medio);
+    color: white;
+    border: none;
+    border-radius: 25px;
+    padding: 0.6rem 1.8rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.05em;
+  }
+
+  .btn-siguiente:hover { background: var(--verde-claro); transform: translateY(-2px); }
+
+  /* === PANTALLA RESULTADO === */
+  #pantalla-resultado .circulo-score {
+    width: 180px; height: 180px;
+    border-radius: 50%;
+    border: 6px solid var(--verde-claro);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin: 2rem auto;
+    background: rgba(82,183,136,0.15);
+    box-shadow: 0 0 40px rgba(82,183,136,0.3);
+    animation: pulsar 2s ease-in-out infinite;
+  }
+
+  @keyframes pulsar {
+    0%, 100% { box-shadow: 0 0 20px rgba(82,183,136,0.3); }
+    50%       { box-shadow: 0 0 50px rgba(82,183,136,0.6); }
+  }
+
+  .score-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 3.5rem;
+    font-weight: 900;
+    color: var(--dorado);
+    line-height: 1;
+  }
+
+  .score-total {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.9rem;
+    color: var(--verde-lima);
+  }
+
+  .medalla {
+    font-size: 4rem;
+    margin-bottom: 0.5rem;
+    animation: girar 1s ease;
+  }
+
+  @keyframes girar {
+    from { transform: rotateY(0deg) scale(0); }
+    to   { transform: rotateY(360deg) scale(1); }
+  }
+
+  .resultado-titulo {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.5rem, 4vw, 2.5rem);
+    color: var(--dorado);
+    margin-bottom: 0.5rem;
+  }
+
+  .resultado-subtitulo {
+    font-style: italic;
+    color: var(--verde-lima);
+    font-size: 1rem;
+    margin-bottom: 2rem;
+    max-width: 500px;
+  }
+
+  .stats-resultado {
+    display: flex;
+    gap: 1.5rem;
+    justify-content: center;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+  }
+
+  .stat-item {
+    text-align: center;
+    background: rgba(255,255,255,0.07);
+    border-radius: 14px;
+    padding: 1rem 1.5rem;
+    min-width: 110px;
+    border: 1px solid rgba(82,183,136,0.2);
+  }
+
+  .stat-num {
+    font-family: 'Space Mono', monospace;
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--dorado);
+    display: block;
+  }
+
+  .stat-label {
+    font-size: 0.78rem;
+    color: rgba(255,255,255,0.5);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  .btns-resultado {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .btn-secundario {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    background: transparent;
+    color: var(--verde-claro);
+    border: 1.5px solid var(--verde-claro);
+    border-radius: 25px;
+    padding: 0.7rem 1.8rem;
+    cursor: pointer;
+    transition: all 0.25s;
+    letter-spacing: 0.05em;
+  }
+
+  .btn-secundario:hover {
+    background: rgba(82,183,136,0.15);
+    transform: translateY(-2px);
+  }
+
+  /* === CONFETTI === */
+  .confeti {
+    position: fixed;
+    width: 8px; height: 8px;
+    border-radius: 2px;
+    animation: caer linear forwards;
+    z-index: 100;
+    pointer-events: none;
+  }
+
+  @keyframes caer {
+    from { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+    to   { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+  }
+
+  /* === MODAL AYUDA EXPERTO === */
+  .modal-overlay {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.7);
+    z-index: 200;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+
+  .modal-overlay.visible { display: flex; }
+
+  .modal-caja {
+    background: linear-gradient(145deg, #1a3a2a, #2d6a4f);
+    border: 2px solid var(--verde-claro);
+    border-radius: 24px;
+    padding: 2rem;
+    max-width: 520px;
+    width: 100%;
+    text-align: center;
+    animation: aparecer 0.3s ease;
+    position: relative;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  }
+
+  .modal-avatar {
+    font-size: 3.5rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .modal-titulo {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.3rem;
+    color: var(--dorado);
+    margin-bottom: 1rem;
+  }
+
+  .modal-texto {
+    font-size: 0.9rem;
+    line-height: 1.7;
+    color: var(--crema);
+    margin-bottom: 1.5rem;
+  }
+
+  .btn-cerrar-modal {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.85rem;
+    font-weight: 700;
+    background: var(--verde-medio);
+    color: white;
+    border: none;
+    border-radius: 25px;
+    padding: 0.7rem 2rem;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  .btn-cerrar-modal:hover { background: var(--verde-claro); }
+
+  /* === RACHA === */
+  .racha-badge {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: linear-gradient(135deg, var(--amarillo-bambu), var(--dorado));
+    color: #1a1a1a;
+    font-family: 'Playfair Display', serif;
+    font-size: 1.8rem;
+    font-weight: 900;
+    padding: 1rem 2rem;
+    border-radius: 20px;
+    z-index: 150;
+    animation: racha-anim 1.5s ease forwards;
+    pointer-events: none;
+  }
+
+  @keyframes racha-anim {
+    0%   { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
+    30%  { opacity: 1; transform: translate(-50%, -50%) scale(1.1); }
+    70%  { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+    100% { opacity: 0; transform: translate(-50%, -70%) scale(0.9); }
+  }
+
+  /* === PANTALLA GAME OVER === */
+  #pantalla-gameover .emoji-grande { font-size: 5rem; margin-bottom: 1rem; }
+
+  .separador {
+    width: 80px;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, var(--verde-claro), transparent);
+    margin: 1rem auto;
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-thumb { background: var(--verde-medio); border-radius: 10px; }
+</style>
+</head>
+<body>
+
+<!-- Fondo animado -->
+<div id="bambu-bg"></div>
+
+<!-- Badge de racha -->
+<div class="racha-badge" id="racha-badge"></div>
+
+<!-- Modal Experto -->
+<div class="modal-overlay" id="modal-experto">
+  <div class="modal-caja">
+    <div class="modal-avatar">🌿</div>
+    <div class="modal-titulo">Consejo del Experto</div>
+    <div class="modal-texto" id="modal-texto-experto"></div>
+    <button class="btn-cerrar-modal" onclick="cerrarModal()">Entendido ✓</button>
+  </div>
+</div>
+
+<!-- ======================== INICIO ======================== -->
+<div class="pantalla activa" id="pantalla-inicio">
+  <div class="logo-titulo">🎋 GUADUA<br>QUEST</div>
+  <div class="subtitulo-inicio">El juego del saber verde — Política y gestión de la guadua en Colombia</div>
+
+  <div class="tarjeta-intro">
+    <h3>🌱 ¿Cómo jugar?</h3>
+    <ul class="reglas-lista">
+      <li><span class="icono">📋</span><span>12 preguntas sobre registro, gestión ambiental y normativa</span></li>
+      <li><span class="icono">❤️</span><span>Tienes 3 vidas — cada error te cuesta una</span></li>
+      <li><span class="icono">⭐</span><span>Ganas puntos extra por responder rápido y acertar en racha</span></li>
+      <li><span class="icono">🔍</span><span><b>Ayuda 50/50:</b> elimina 2 opciones incorrectas (2 usos)</span></li>
+      <li><span class="icono">🌿</span><span><b>Consejo del experto:</b> pista sin eliminar opciones (2 usos)</span></li>
+      <li><span class="icono">🏅</span><span>Desbloquea medalla de experto con 10+ aciertos</span></li>
+    </ul>
+  </div>
+
+  <button class="btn-principal" onclick="iniciarJuego()">🎯 Iniciar Aventura Verde</button>
+</div>
+
+<!-- ======================== JUEGO ======================== -->
+<div class="pantalla" id="pantalla-juego">
+  <!-- HUD -->
+  <div class="hud">
+    <div class="hud-item">
+      <span>❤️</span>
+      <div class="vidas-display" id="vidas-display"></div>
+    </div>
+    <div class="hud-item">
+      <span>⭐</span>
+      <span class="val" id="hud-puntos">0</span>
+      <span>pts</span>
+    </div>
+    <div class="hud-item">
+      <span>🔥</span>
+      <span class="val" id="hud-racha">0</span>
+      <span>racha</span>
+    </div>
+    <div class="hud-item">
+      <span>⏱️</span>
+      <span class="val" id="hud-tiempo">30</span>
+      <span>seg</span>
+    </div>
+  </div>
+
+  <!-- Barra de progreso -->
+  <div class="barra-progreso-wrap">
+    <div class="barra-progreso">
+      <div class="barra-fill" id="barra-fill" style="width:0%"></div>
+    </div>
+    <div class="pregunta-contador" id="pregunta-contador">Pregunta 1 de 12</div>
+  </div>
+
+  <!-- Tarjeta pregunta -->
+  <div class="tarjeta-pregunta" id="tarjeta-pregunta">
+    <div class="etiqueta-tema" id="etiqueta-tema">📜 Bloque 1</div>
+    <div class="contexto-pregunta" id="contexto-pregunta"></div>
+    <div class="texto-pregunta" id="texto-pregunta"></div>
+    <div class="opciones-grid" id="opciones-grid"></div>
+  </div>
+
+  <!-- Feedback -->
+  <div class="feedback-box" id="feedback-box">
+    <div class="feedback-titulo" id="feedback-titulo"></div>
+    <div class="feedback-texto" id="feedback-texto"></div>
+    <button class="btn-siguiente" id="btn-siguiente" onclick="siguientePregunta()">Siguiente →</button>
+  </div>
+
+  <!-- Ayudas -->
+  <div class="ayudas-barra">
+    <button class="ayuda-btn" id="btn-5050" onclick="usar5050()">
+      <span class="ayuda-icono">✂️</span> 50/50
+      <span id="cont-5050" style="opacity:0.6">(×2)</span>
+    </button>
+    <button class="ayuda-btn" id="btn-experto" onclick="usarExperto()">
+      <span class="ayuda-icono">🌿</span> Experto
+      <span id="cont-experto" style="opacity:0.6">(×2)</span>
+    </button>
+  </div>
+</div>
+
+<!-- ======================== GAME OVER ======================== -->
+<div class="pantalla" id="pantalla-gameover">
+  <div class="emoji-grande">🌱</div>
+  <div class="resultado-titulo">¡Se acabaron las vidas!</div>
+  <div class="separador"></div>
+  <div class="resultado-subtitulo">La guadua siempre se regenera — tú también puedes</div>
+  <div class="stats-resultado">
+    <div class="stat-item">
+      <span class="stat-num" id="go-puntos">0</span>
+      <span class="stat-label">Puntos</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-num" id="go-correctas">0</span>
+      <span class="stat-label">Correctas</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-num" id="go-llegaste">0</span>
+      <span class="stat-label">Preguntas</span>
+    </div>
+  </div>
+  <div class="btns-resultado">
+    <button class="btn-principal" onclick="iniciarJuego()">🔄 Intentar de nuevo</button>
+    <button class="btn-secundario" onclick="mostrarInicio()">🏠 Inicio</button>
+  </div>
+</div>
+
+<!-- ======================== RESULTADO ======================== -->
+<div class="pantalla" id="pantalla-resultado">
+  <div class="medalla" id="medalla-emoji"></div>
+  <div class="resultado-titulo" id="resultado-titulo"></div>
+  <div class="resultado-subtitulo" id="resultado-subtitulo"></div>
+
+  <div class="circulo-score">
+    <span class="score-num" id="score-final">0</span>
+    <span class="score-total" id="score-total-txt">puntos</span>
+  </div>
+
+  <div class="stats-resultado">
+    <div class="stat-item">
+      <span class="stat-num" id="res-correctas">0</span>
+      <span class="stat-label">Correctas</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-num" id="res-tiempo">0s</span>
+      <span class="stat-label">Tiempo prom.</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-num" id="res-racha">0</span>
+      <span class="stat-label">Mejor racha</span>
+    </div>
+  </div>
+
+  <div class="btns-resultado">
+    <button class="btn-principal" onclick="iniciarJuego()">🔄 Jugar de nuevo</button>
+    <button class="btn-secundario" onclick="mostrarInicio()">🏠 Inicio</button>
+  </div>
+</div>
+
+<audio id="audio-correcto" src="https://assets.mixkit.co/active_storage/sfx/2018/2018-preview.mp3" preload="auto"></audio>
+<audio id="audio-incorrecto" src="https://assets.mixkit.co/active_storage/sfx/2955/2955-preview.mp3" preload="auto"></audio>
+<audio id="audio-final" src="https://assets.mixkit.co/active_storage/sfx/2000/2000-preview.mp3" preload="auto"></audio>
+
+<script>
+// ===================== DATOS PREGUNTAS =====================
+const PREGUNTAS = [
+  {
+    bloque: "Bloque 1 · Registro y Gestión Ambiental",
+    articulado: "Ley 2206 de 2022, Art. 3°",
+    contexto: "Un propietario desea saber cómo clasificar legalmente su plantación de guadua establecida para recuperar un suelo degradado y proteger una cuenca hidrográfica.",
+    pregunta: "Según la ley, ¿en qué categoría se clasifican los guaduales y bambusales plantados por el hombre con fines de recuperación de suelos y protección de cuencas?",
+    opciones: ["A) Categoría 1: Guaduales naturales en áreas protectoras.", "B) Categoría 2: Guaduales plantados con carácter protector y protector-productor.", "C) Categoría 3: Guaduales plantados con carácter productor dentro de la Frontera Agrícola.", "D) Categoría 4: Guaduales de aprovechamiento industrial irrestricto."],
+    correcta: 1,
+    justificacion: "La Ley 2206 define la Categoría 2 como guaduales plantados con carácter protector y protector-productor — exactamente el perfil de una plantación para recuperar suelos y proteger cuencas.",
+    pista: "Piensa: si el objetivo es PROTEGER el suelo y el agua, ¿qué categoría tendría la palabra 'protector' en su nombre?"
+  },
+  {
+    bloque: "Bloque 1 · Registro y Gestión Ambiental",
+    articulado: "Ley 2206 de 2022, Art. 4°",
+    contexto: "Un empresario agroindustrial ha establecido una plantación de bambú con fines netamente comerciales en un área identificada como apta dentro de la frontera agrícola por la UPRA.",
+    pregunta: "¿Ante qué entidad deben registrarse los guaduales y bambusales clasificados como Categoría 3?",
+    opciones: ["A) Ante el Ministerio de Ambiente y Desarrollo Sostenible.", "B) Ante la Corporación Autónoma Regional (CAR) de su jurisdicción.", "C) Ante el Instituto Colombiano Agropecuario (ICA).", "D) Ante la Unidad de Planificación Rural Agropecuaria (UPRA)."],
+    correcta: 2,
+    justificacion: "El ICA (Instituto Colombiano Agropecuario) es la entidad encargada del registro para la Categoría 3, que corresponde a guaduales con fines productivos dentro de la frontera agrícola.",
+    pista: "Categoría 3 es de carácter AGROPECUARIO y productivo. ¿Qué entidad regula el sector agropecuario en Colombia?"
+  },
+  {
+    bloque: "Bloque 1 · Registro y Gestión Ambiental",
+    articulado: "Ley 2206 de 2022, Art. 4° (Parágrafo 1)",
+    contexto: "Se busca incentivar el registro de áreas de conservación y manejo sostenible (Categorías 1 y 2) para asegurar la trazabilidad del recurso.",
+    pregunta: "Respecto a los costos de gestión para las Categorías 1 y 2, ¿cuál de las siguientes afirmaciones es correcta?",
+    opciones: ["A) El registro y las visitas de verificación son totalmente gratuitos.", "B) El registro tiene un costo, pero las visitas de seguimiento son gratuitas.", "C) El registro no tiene costo, pero se aplicará cobro por las visitas de verificación y seguimiento.", "D) Tanto el registro como las visitas tienen un costo fijado por el Ministerio de Agricultura."],
+    correcta: 2,
+    justificacion: "El parágrafo 1 establece que el registro es GRATUITO para Categorías 1 y 2 (incentivando la conservación), pero las visitas de verificación y seguimiento tienen costo según la Resolución 1280/2010.",
+    pista: "El Estado quiere INCENTIVAR que la gente registre sus guaduales de conservación. Si hubiera que pagar por registrarse, ¿lo haría la gente? Pero las visitas técnicas ya son un servicio adicional..."
+  },
+  {
+    bloque: "Bloque 1 · Registro y Gestión Ambiental",
+    articulado: "Ley 2206 de 2022, Art. 5°",
+    contexto: "El Gobierno nacional busca garantizar la trazabilidad de los productos de la guadua y el bambú mediante la articulación de datos espaciales.",
+    pregunta: "¿Con qué sistema de información se debe articular la generación de información geográfica de los guaduales y bambusales del país?",
+    opciones: ["A) Con el Sistema de Información Ambiental de Colombia (SIAC).", "B) Con el Registro Único de Usuarios del Recurso Hídrico.", "C) Únicamente con el Catastro Multipropósito.", "D) Con el Sistema de Información de Combustibles Líquidos (SICOM)."],
+    correcta: 0,
+    justificacion: "El artículo 5° indica que la información geográfica se debe articular con el SIAC (Sistema de Información Ambiental de Colombia), que también incluye el SNIF y el SMBYC.",
+    pista: "¿Qué sistema reúne TODA la información ambiental de Colombia? Su sigla tiene 4 letras y la primera es del Sistema..."
+  },
+  {
+    bloque: "Bloque 1 · Registro y Gestión Ambiental",
+    articulado: "Ley 2206 de 2022, Art. 11",
+    contexto: "Varios propietarios de predios privados con guaduales registrados de Categoría 2 y 3 desean unirse para realizar un manejo sostenible conjunto.",
+    pregunta: "¿Qué requisito previo deben cumplir los propietarios para poder conformar 'Núcleos Productivos'?",
+    opciones: ["A) Haber obtenido una licencia ambiental global del Ministerio de Ambiente.", "B) Haber registrado previamente sus guaduales ante la autoridad ambiental competente.", "C) Ser parte de un resguardo indígena o territorio colectivo titulado.", "D) Estar inscritos en la Cámara de Comercio como exportadores de madera."],
+    correcta: 1,
+    justificacion: "El registro ante la autoridad ambiental es el paso previo e indispensable para conformar Núcleos Productivos. Sin registro no hay trazabilidad, y sin trazabilidad no puede haber asociación reconocida.",
+    pista: "Para agruparse y hacer manejo conjunto, el Estado primero necesita saber QUÉ tienen y DÓNDE está. ¿Qué proceso permite eso?"
+  },
+  {
+    bloque: "Bloque 1 · Registro y Gestión Ambiental",
+    articulado: "Decreto 1532 de 2019, Art. 2.2.1.1.12.1",
+    contexto: "El marco reglamentario define las clases de plantaciones para determinar quién ejerce la autoridad ambiental sobre ellas.",
+    pregunta: "¿Cuál es la característica principal de las 'Plantaciones forestales protectoras-productoras' según este decreto?",
+    opciones: ["A) Son aquellas establecidas exclusivamente en áreas de reserva forestal nacional.", "B) Son aquellas donde el aprovechamiento directo o indirecto está condicionado al mantenimiento del efecto de protección del recurso.", "C) Son plantaciones destinadas únicamente a la investigación científica sin fines comerciales.", "D) Son plantaciones establecidas antes de la expedición de la Ley 2ª de 1959."],
+    correcta: 1,
+    justificacion: "La característica definitoria es el EQUILIBRIO: se puede aprovechar (producir), pero siempre y cuando se mantenga el efecto protector. Es la esencia del desarrollo sostenible aplicado al bosque.",
+    pista: "El nombre dice todo: 'protectora-PRODUCTORA'. ¿Qué significa que sea las dos cosas a la vez? ¿Cuál es la condición que impone esa dualidad?"
+  },
+  {
+    bloque: "Bloque 1 · Plan Nacional de Desarrollo",
+    articulado: "Ley 2294 de 2023, Art. 226",
+    contexto: "El Gobierno busca resolver desafíos sociales y ambientales mediante misiones de innovación que generen una 'Colombia Potencia Mundial de la Vida'.",
+    pregunta: "¿Cuál de los siguientes tópicos está explícitamente incluido como una de las 'misiones' para orientar las políticas de Ciencia, Tecnología e Innovación en el actual PND?",
+    opciones: ["A) La explotación intensiva de recursos minero-energéticos tradicionales.", "B) El desarrollo de la bioeconomía.", "C) El registro exclusivo de guaduales en zonas urbanas.", "D) La eliminación de los incentivos para la reforestación."],
+    correcta: 1,
+    justificacion: "El Art. 226 de la Ley 2294 incluye la bioeconomía como eje de innovación dentro del PND, reconociendo el potencial de recursos biológicos como la guadua para generar valor económico sostenible.",
+    pista: "El PND actual tiene como lema 'Colombia Potencia Mundial de la VIDA'. ¿Qué tipo de economía se basa en recursos vivos y biológicos?"
+  },
+  {
+    bloque: "Bloque 1 · Plan Nacional de Desarrollo",
+    articulado: "Ley 2294 de 2023, Art. 55",
+    contexto: "Se busca permitir que comunidades en condiciones de vulnerabilidad aprovechen recursos de la biodiversidad en baldíos de la Nación dentro de zonas de reserva forestal.",
+    pregunta: "¿Cómo se denomina el mecanismo creado para otorgar el uso del recurso forestal y de la biodiversidad a organizaciones campesinas, promoviendo el manejo forestal sostenible?",
+    opciones: ["A) Licencia Ambiental Global Productiva.", "B) Contrato de Arrendamiento Forestal.", "C) Concesión Forestal Campesina.", "D) Título de Propiedad Privada Forestal."],
+    correcta: 2,
+    justificacion: "La Concesión Forestal Campesina es el mecanismo del Art. 55 que permite a organizaciones campesinas acceder al uso sostenible de recursos forestales y de biodiversidad (como la guadua) en baldíos nacionales.",
+    pista: "No es propiedad, no es alquiler... es un derecho de uso temporal que el Estado 'concede'. ¿A quiénes? A comunidades del campo."
+  },
+  {
+    bloque: "Bloque 1 · Plan Nacional de Desarrollo",
+    articulado: "Ley 2294 de 2023, Art. 32",
+    contexto: "Un municipio está actualizando su Plan de Ordenamiento Territorial (POT) y debe priorizar las normas de protección ambiental y del ciclo del agua según la nueva jerarquía legal.",
+    pregunta: "Según la jerarquía de determinantes de ordenamiento territorial, ¿qué nivel ocupan las normas relacionadas con la conservación del ciclo del agua y la gestión del cambio climático?",
+    opciones: ["A) Nivel 1: Son de superior jerarquía y prevalencia.", "B) Nivel 3: Están supeditadas al patrimonio cultural.", "C) Nivel 6: Son secundarias a los proyectos turísticos.", "D) No tienen nivel asignado, son discrecionales del alcalde."],
+    correcta: 0,
+    justificacion: "El Art. 32 sitúa al agua y la gestión ambiental en el Nivel 1 de la jerarquía de determinantes de ordenamiento territorial — el más alto. Esto es clave para la guadua como protectora de cuencas.",
+    pista: "¿Puede haber vida, agricultura, ni ciudad sin agua? El legislador colombiano tomó una decisión clara sobre la jerarquía del agua."
+  },
+  {
+    bloque: "Bloque 1 · Concepto CNP / Territorios PDET",
+    articulado: "Concepto CNP a las Bases del PND 2022-2026",
+    contexto: "El concepto de la sociedad civil resalta el potencial de ciertas plantas para ofrecer alternativas de ingresos sostenibles en zonas afectadas por el conflicto.",
+    pregunta: "Según las recomendaciones del CNP, ¿en qué tipo de sistemas se sugiere el uso de 'bambúes' para ofrecer alternativas de ingresos sostenibles a poblaciones vulnerables en municipios PDET?",
+    opciones: ["A) En sistemas de monocultivo industrial de exportación.", "B) En agroforestería o sistemas de uso de la tierra con plantas leñosas perennes.", "C) Únicamente en proyectos de infraestructura vial nacional.", "D) En zonas destinadas exclusivamente a la minería de subsistencia."],
+    correcta: 1,
+    justificacion: "El CNP recomienda la agroforestería con bambú para el desarrollo de zonas de paz: sistemas que combinan árboles y cultivos, generando ingresos mientras se restaura el entorno.",
+    pista: "El bambú es una planta que crece junto a otras. ¿En qué sistema productivo se combinan especies leñosas (como árboles y bambúes) con cultivos o pastos?"
+  },
+  {
+    bloque: "Bloque 1 · Línea de Tiempo Normativa",
+    articulado: "Ley 2206 de 2022, Art. 3° (Categoría 2)",
+    contexto: "Un propietario tiene una plantación de guadua establecida en 2008 en un área protectora-productora y teme que la nueva ley de 2022 le exija requisitos que antes no existían.",
+    pregunta: "¿Qué disposición garantiza la vigencia de las plantaciones en áreas protectoras-productoras establecidas antes de la ley de 2022?",
+    opciones: ["A) Deben registrarse nuevamente como si fueran bosques naturales.", "B) Seguirán vigentes si fueron establecidas con anterioridad a la Ley 1450 de 2011.", "C) Quedan automáticamente anuladas para priorizar la restauración natural.", "D) Solo siguen vigentes si el propietario es una gran empresa agroindustrial."],
+    correcta: 1,
+    justificacion: "La Ley 2206 respeta la vigencia de plantaciones previas a la Ley 1450 de 2011, garantizando la seguridad jurídica de los propietarios que actuaron de buena fe bajo el marco normativo anterior.",
+    pista: "En derecho, los actos realizados ANTES de una nueva norma generalmente se respetan. ¿Cuál fue la ley de 2011 que marcó el hito normativo anterior?"
+  },
+  {
+    bloque: "Bloque 1 · Registro ante el ICA",
+    articulado: "Ley 2206 de 2022, Art. 4°",
+    contexto: "La Ley 2206 remite a normas anteriores para fundamentar el registro comercial (Categoría 3) ante el ICA.",
+    pregunta: "¿En qué norma se fundamenta legalmente el registro de guaduales Categoría 3 ante el ICA y la definición de sus tarifas?",
+    opciones: ["A) En el Código de Policía vigente.", "B) En la Ley 1955 de 2019 (PND anterior).", "C) En el Decreto Ley 2811 de 1974.", "D) En la Ley 2ª de 1959."],
+    correcta: 1,
+    justificacion: "La Ley 2206 cita expresamente la Ley 1955 de 2019 (Plan Nacional de Desarrollo anterior) como base para el registro comercial ante el ICA y la definición de tarifas aplicables.",
+    pista: "El registro agropecuario ante el ICA fue establecido en el Plan Nacional de Desarrollo... ¿de qué año? Hint: fue el PND del gobierno INMEDIATAMENTE anterior al actual."
+  }
+];
+
+// ===================== ESTADO DEL JUEGO =====================
+let estado = {
+  preguntaActual: 0,
+  puntos: 0,
+  vidas: 3,
+  racha: 0,
+  mejorRacha: 0,
+  correctas: 0,
+  ayudas5050: 2,
+  ayudasExperto: 2,
+  respondida: false,
+  tiempoRestante: 30,
+  timerInterval: null,
+  tiemposTotales: 0,
+  preguntasJugadas: 0
+};
+
+// ===================== INIT FONDO =====================
+function crearFondo() {
+  const bg = document.getElementById('bambu-bg');
+  // Cañas de guadua
+  const colores = ['#2d6a4f','#1b4332','#40916c','#52b788','#74c69d'];
+  for (let i = 0; i < 22; i++) {
+    const caña = document.createElement('div');
+    caña.className = 'caña';
+    const h = 200 + Math.random() * 500;
+    caña.style.cssText = `
+      height: ${h}px;
+      left: ${i * (100/22)}%;
+      background: linear-gradient(180deg, ${colores[Math.floor(Math.random()*colores.length)]}, ${colores[Math.floor(Math.random()*colores.length)]});
+      opacity: ${0.15 + Math.random() * 0.25};
+      animation-delay: ${Math.random() * 4}s;
+      animation-duration: ${3 + Math.random() * 3}s;
+    `;
+    // Nodos del bambú
+    for (let j = 0; j < Math.floor(h/60); j++) {
+      const nodo = document.createElement('div');
+      nodo.style.cssText = `position:absolute;bottom:${j*60+30}px;left:0;right:0;height:3px;background:rgba(0,0,0,0.3);border-radius:2px`;
+      caña.appendChild(nodo);
+    }
+    bg.appendChild(caña);
+  }
+  // Hojas
+  for (let i = 0; i < 15; i++) {
+    const h = document.createElement('div');
+    h.className = 'hoja-bg';
+    h.style.cssText = `
+      width: ${40+Math.random()*80}px;
+      height: ${20+Math.random()*40}px;
+      background: #${Math.floor(Math.random()*3) === 0 ? '52b788' : Math.floor(Math.random()*2) === 0 ? '40916c' : '2d6a4f'};
+      top: ${Math.random()*80}%;
+      left: ${Math.random()*100}%;
+      animation-delay: ${Math.random()*8}s;
+      animation-duration: ${6+Math.random()*6}s;
+      transform: rotate(${Math.random()*60-30}deg);
+    `;
+    bg.appendChild(h);
+  }
+}
+
+// ===================== CONTROL PANTALLAS =====================
+function mostrarPantalla(id) {
+  document.querySelectorAll('.pantalla').forEach(p => p.classList.remove('activa'));
+  document.getElementById(id).classList.add('activa');
+}
+
+function mostrarInicio() {
+  mostrarPantalla('pantalla-inicio');
+}
+
+// ===================== INICIO JUEGO =====================
+function iniciarJuego() {
+  estado = {
+    preguntaActual: 0,
+    puntos: 0,
+    vidas: 3,
+    racha: 0,
+    mejorRacha: 0,
+    correctas: 0,
+    ayudas5050: 2,
+    ayudasExperto: 2,
+    respondida: false,
+    tiempoRestante: 30,
+    timerInterval: null,
+    tiemposTotales: 0,
+    preguntasJugadas: 0
+  };
+  actualizarHUD();
+  mostrarPantalla('pantalla-juego');
+  cargarPregunta();
+}
+
+// ===================== CARGAR PREGUNTA =====================
+function cargarPregunta() {
+  if (estado.preguntaActual >= PREGUNTAS.length) {
+    finJuego();
+    return;
+  }
+
+  const q = PREGUNTAS[estado.preguntaActual];
+  estado.respondida = false;
+
+  // Tarjeta - reanimar
+  const tarjeta = document.getElementById('tarjeta-pregunta');
+  tarjeta.style.animation = 'none';
+  tarjeta.offsetHeight;
+  tarjeta.style.animation = 'deslizar 0.4s ease';
+
+  document.getElementById('etiqueta-tema').textContent = '📜 ' + q.bloque;
+  document.getElementById('contexto-pregunta').innerHTML = `<strong>Contexto:</strong> ${q.contexto} <em style="display:block;margin-top:4px;font-size:0.82rem;color:rgba(255,255,255,0.5)">📋 ${q.articulado}</em>`;
+  document.getElementById('texto-pregunta').textContent = q.pregunta;
+
+  // Opciones
+  const grid = document.getElementById('opciones-grid');
+  grid.innerHTML = '';
+  const letras = ['A', 'B', 'C', 'D'];
+  q.opciones.forEach((op, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'opcion-btn';
+    btn.id = `opcion-${i}`;
+    btn.onclick = () => responder(i);
+    const texto = op.replace(/^[ABCD]\) /, '');
+    btn.innerHTML = `<span class="letra">${letras[i]}</span><span>${texto}</span>`;
+    grid.appendChild(btn);
+  });
+
+  // Feedback oculto
+  document.getElementById('feedback-box').classList.remove('visible', 'error');
+
+  // Botones ayuda
+  document.getElementById('btn-5050').disabled = estado.ayudas5050 <= 0;
+  document.getElementById('btn-experto').disabled = estado.ayudasExperto <= 0;
+  document.getElementById('cont-5050').textContent = `(×${estado.ayudas5050})`;
+  document.getElementById('cont-experto').textContent = `(×${estado.ayudasExperto})`;
+
+  // Progreso
+  const pct = (estado.preguntaActual / PREGUNTAS.length) * 100;
+  document.getElementById('barra-fill').style.width = pct + '%';
+  document.getElementById('pregunta-contador').textContent = `Pregunta ${estado.preguntaActual + 1} de ${PREGUNTAS.length}`;
+
+  // Timer
+  iniciarTimer();
+}
+
+// ===================== TIMER =====================
+function iniciarTimer() {
+  clearInterval(estado.timerInterval);
+  estado.tiempoRestante = 30;
+  document.getElementById('hud-tiempo').textContent = 30;
+
+  estado.timerInterval = setInterval(() => {
+    estado.tiempoRestante--;
+    document.getElementById('hud-tiempo').textContent = estado.tiempoRestante;
+    if (estado.tiempoRestante <= 10) {
+      document.getElementById('hud-tiempo').style.color = '#e07b6a';
+    } else {
+      document.getElementById('hud-tiempo').style.color = 'var(--dorado)';
+    }
+    if (estado.tiempoRestante <= 0) {
+      clearInterval(estado.timerInterval);
+      if (!estado.respondida) tiempoAgotado();
+    }
+  }, 1000);
+}
+
+function tiempoAgotado() {
+  estado.respondida = true;
+  estado.racha = 0;
+  document.getElementById('hud-racha').textContent = 0;
+  perderVida();
+  const q = PREGUNTAS[estado.preguntaActual];
+  document.getElementById(`opcion-${q.correcta}`).classList.add('correcta');
+  mostrarFeedback(false, '⏰ ¡Se acabó el tiempo!', `La respuesta correcta era: ${q.opciones[q.correcta].replace(/^[ABCD]\) /,'')}. ${q.justificacion}`);
+  deshabilitarOpciones();
+}
+
+// ===================== RESPONDER =====================
+function responder(indice) {
+  if (estado.respondida) return;
+  clearInterval(estado.timerInterval);
+  estado.respondida = true;
+  estado.preguntasJugadas++;
+
+  const q = PREGUNTAS[estado.preguntaActual];
+  const tiempoUsado = 30 - estado.tiempoRestante;
+  estado.tiemposTotales += tiempoUsado;
+
+  const esCorrecta = indice === q.correcta;
+  const btn = document.getElementById(`opcion-${indice}`);
+
+  if (esCorrecta) {
+    btn.classList.add('correcta');
+    const bonusVelocidad = tiempoUsado < 10 ? 30 : tiempoUsado < 20 ? 15 : 0;
+    const bonusRacha = estado.racha >= 2 ? 20 * estado.racha : 0;
+    const puntosGanados = 100 + bonusVelocidad + bonusRacha;
+    estado.puntos += puntosGanados;
+    estado.correctas++;
+    estado.racha++;
+    if (estado.racha > estado.mejorRacha) estado.mejorRacha = estado.racha;
+
+    reproducirSonido('correcto');
+    if (estado.racha >= 3) mostrarRacha(estado.racha);
+    if (estado.racha >= 5) lanzarConfeti();
+
+    mostrarFeedback(true,
+      `✅ ¡Correcto! +${puntosGanados} pts`,
+      q.justificacion + (bonusVelocidad ? ` 🚀 +${bonusVelocidad} bonus velocidad!` : '') + (bonusRacha ? ` 🔥 +${bonusRacha} bonus racha!` : '')
+    );
+  } else {
+    btn.classList.add('incorrecta');
+    document.getElementById(`opcion-${q.correcta}`).classList.add('correcta');
+    estado.racha = 0;
+    reproducirSonido('incorrecto');
+    perderVida();
+    mostrarFeedback(false,
+      `❌ No es correcto`,
+      `La respuesta correcta era la opción ${['A','B','C','D'][q.correcta]}. ${q.justificacion}`
+    );
+  }
+
+  deshabilitarOpciones();
+  actualizarHUD();
+}
+
+function deshabilitarOpciones() {
+  document.querySelectorAll('.opcion-btn').forEach(b => b.disabled = true);
+}
+
+// ===================== VIDAS =====================
+function perderVida() {
+  estado.vidas--;
+  actualizarVidas();
+  if (estado.vidas <= 0) {
+    setTimeout(gameOver, 1800);
+  }
+}
+
+function actualizarVidas() {
+  const div = document.getElementById('vidas-display');
+  div.innerHTML = '';
+  for (let i = 0; i < 3; i++) {
+    const c = document.createElement('span');
+    c.className = 'corazon' + (i >= estado.vidas ? ' perdido' : '');
+    c.textContent = '🌿';
+    div.appendChild(c);
+  }
+}
+
+// ===================== HUD =====================
+function actualizarHUD() {
+  document.getElementById('hud-puntos').textContent = estado.puntos;
+  document.getElementById('hud-racha').textContent = estado.racha;
+  actualizarVidas();
+}
+
+// ===================== FEEDBACK =====================
+function mostrarFeedback(ok, titulo, texto) {
+  const box = document.getElementById('feedback-box');
+  const t = document.getElementById('feedback-titulo');
+  box.classList.add('visible');
+  box.classList.toggle('error', !ok);
+  t.textContent = titulo;
+  t.className = 'feedback-titulo ' + (ok ? 'ok' : 'fail');
+  document.getElementById('feedback-texto').textContent = texto;
+}
+
+function siguientePregunta() {
+  estado.preguntaActual++;
+  if (estado.vidas > 0) cargarPregunta();
+}
+
+// ===================== GAME OVER =====================
+function gameOver() {
+  clearInterval(estado.timerInterval);
+  document.getElementById('go-puntos').textContent = estado.puntos;
+  document.getElementById('go-correctas').textContent = estado.correctas;
+  document.getElementById('go-llegaste').textContent = estado.preguntaActual + 1;
+  mostrarPantalla('pantalla-gameover');
+}
+
+// ===================== FIN JUEGO =====================
+function finJuego() {
+  clearInterval(estado.timerInterval);
+  reproducirSonido('final');
+  lanzarConfeti();
+
+  const pct = Math.round((estado.correctas / PREGUNTAS.length) * 100);
+  let medalla, titulo, sub;
+
+  if (estado.correctas >= 11) {
+    medalla = '🏆'; titulo = '¡Experto en Guadua!';
+    sub = 'Dominas la normativa como la guadua domina las laderas. ¡Increíble!';
+  } else if (estado.correctas >= 9) {
+    medalla = '🥇'; titulo = '¡Conocedor Avanzado!';
+    sub = 'Tu comprensión de la política de guadua es sólida como el culmo.';
+  } else if (estado.correctas >= 7) {
+    medalla = '🥈'; titulo = '¡Buen Manejo!';
+    sub = 'Vas por buen camino. Repasa los artículos y vuelve a intentarlo.';
+  } else if (estado.correctas >= 5) {
+    medalla = '🥉'; titulo = '¡Aprendiz Verde!';
+    sub = 'Las bases están. Con práctica llegarás a experto.';
+  } else {
+    medalla = '🌱'; titulo = 'Semilla de Conocimiento';
+    sub = 'Todo gran guadual empezó como una semilla. ¡Sigue estudiando!';
+  }
+
+  document.getElementById('medalla-emoji').textContent = medalla;
+  document.getElementById('resultado-titulo').textContent = titulo;
+  document.getElementById('resultado-subtitulo').textContent = sub;
+  document.getElementById('score-final').textContent = estado.puntos;
+  document.getElementById('score-total-txt').textContent = `${estado.correctas}/${PREGUNTAS.length} correctas`;
+  document.getElementById('res-correctas').textContent = `${estado.correctas}/${PREGUNTAS.length}`;
+  const tProm = estado.preguntasJugadas > 0 ? Math.round(estado.tiemposTotales / estado.preguntasJugadas) : 0;
+  document.getElementById('res-tiempo').textContent = tProm + 's';
+  document.getElementById('res-racha').textContent = estado.mejorRacha;
+
+  mostrarPantalla('pantalla-resultado');
+}
+
+// ===================== AYUDAS =====================
+function usar5050() {
+  if (estado.ayudas5050 <= 0 || estado.respondida) return;
+  estado.ayudas5050--;
+  document.getElementById('cont-5050').textContent = `(×${estado.ayudas5050})`;
+  if (estado.ayudas5050 <= 0) document.getElementById('btn-5050').disabled = true;
+
+  const q = PREGUNTAS[estado.preguntaActual];
+  const incorrectas = [0,1,2,3].filter(i => i !== q.correcta);
+  const eliminar = incorrectas.sort(() => Math.random()-0.5).slice(0,2);
+  eliminar.forEach(i => {
+    document.getElementById(`opcion-${i}`).classList.add('eliminada');
+    document.getElementById(`opcion-${i}`).disabled = true;
+  });
+}
+
+function usarExperto() {
+  if (estado.ayudasExperto <= 0 || estado.respondida) return;
+  estado.ayudasExperto--;
+  document.getElementById('cont-experto').textContent = `(×${estado.ayudasExperto})`;
+  if (estado.ayudasExperto <= 0) document.getElementById('btn-experto').disabled = true;
+
+  const q = PREGUNTAS[estado.preguntaActual];
+  document.getElementById('modal-texto-experto').innerHTML = `
+    <em style="color:var(--verde-lima);font-size:0.82rem;">Articulado: ${q.articulado}</em><br><br>
+    💡 <strong>Pista:</strong> ${q.pista}
+  `;
+  document.getElementById('modal-experto').classList.add('visible');
+}
+
+function cerrarModal() {
+  document.getElementById('modal-experto').classList.remove('visible');
+}
+
+// ===================== EFECTOS =====================
+function reproducirSonido(tipo) {
+  try {
+    const id = tipo === 'correcto' ? 'audio-correcto' : tipo === 'incorrecto' ? 'audio-incorrecto' : 'audio-final';
+    const a = document.getElementById(id);
+    if (a) { a.currentTime = 0; a.volume = 0.3; a.play().catch(()=>{}); }
+  } catch(e) {}
+}
+
+function lanzarConfeti() {
+  const colores = ['#52b788','#d4a847','#f0c040','#95d5b2','#ffffff','#40916c'];
+  for (let i = 0; i < 60; i++) {
+    setTimeout(() => {
+      const c = document.createElement('div');
+      c.className = 'confeti';
+      c.style.cssText = `
+        left: ${Math.random()*100}vw;
+        background: ${colores[Math.floor(Math.random()*colores.length)]};
+        width: ${6+Math.random()*8}px;
+        height: ${6+Math.random()*8}px;
+        border-radius: ${Math.random() > 0.5 ? '50%' : '2px'};
+        animation-duration: ${1.5+Math.random()*2}s;
+        animation-delay: ${Math.random()*0.5}s;
+      `;
+      document.body.appendChild(c);
+      setTimeout(() => c.remove(), 3000);
+    }, i * 30);
+  }
+}
+
+function mostrarRacha(n) {
+  const badge = document.getElementById('racha-badge');
+  const msgs = {3:'🔥 ¡Racha x3!', 4:'⚡ ¡Racha x4!', 5:'🌟 ¡IMPARABLE x5!', 6:'🏆 ¡MAESTRO x6!', 7:'💎 ¡LEYENDA x7!'};
+  badge.textContent = msgs[Math.min(n,7)] || `🔥 ¡Racha x${n}!`;
+  badge.style.display = 'block';
+  setTimeout(() => { badge.style.display = 'none'; }, 1600);
+}
+
+// ===================== INICIO =====================
+crearFondo();
+</script>
+</body>
+</html>
